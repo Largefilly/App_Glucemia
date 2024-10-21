@@ -8,7 +8,7 @@ import { useFonts, Inder_400Regular } from '@expo-google-fonts/inder';
 
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/Register';
-import MainMenuScreen from './components/MainMenu';
+import MainScreen from './components/MainMenu';
 
 const Stack = createStackNavigator();
 
@@ -25,9 +25,9 @@ export default function App() {
     <SafeAreaView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="wa?" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="MainMenu" component={MainMenuScreen} />
+          <Stack.Screen name="MainMenu" component={MainScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>
