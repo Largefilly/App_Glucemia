@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Inder_400Regular',
+    fontFamily: 'Inder', 
     color: '#2C3E50',
   },
   input: {
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F9F9F9',
-    fontFamily: 'Inder_400Regular',
+    fontFamily: 'Inder', 
   },
   dateRow: {
     flexDirection: 'row',
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'Inder_400Regular',
+    fontFamily: 'Inder',
   },
 });
 
