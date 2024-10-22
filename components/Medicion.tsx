@@ -4,9 +4,15 @@ import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image } from 'r
 const MainMenuScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
 
-    const handleMeasure = () => {
-        // Función para simular la medición de la glucosa
-        setGlucoseLevel('100'); // Este valor lo puedes cambiar o hacer dinámico
+    // Función para generar un valor aleatorio entre 70 y 200
+    const getRandomGlucoseLevel = () => {
+        return Math.floor(Math.random() * (200 - 70 + 1)) + 70;
+    };
+
+    // Función para manejar el evento del ícono de advertencia
+    const handleWarningPress = () => {
+        const newGlucoseLevel = getRandomGlucoseLevel();
+        setGlucoseLevel(newGlucoseLevel.toString());
     };
 
     return (
@@ -15,14 +21,14 @@ const MainMenuScreen = () => {
                 <Text style={styles.title}>Hola Cindy</Text>
             </View>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} /> 
+            <Image source={require('../assets/avatar.png')} style={styles.avatar} /> 
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
-            <TouchableOpacity style={styles.circleContainer} onPress={handleMeasure}>
+            <View style={styles.circleContainer}>
                 <Text style={styles.circleText}>{glucoseLevel}</Text>
                 <Text style={styles.unitText}>mg/dl</Text>
-            </TouchableOpacity>
+            </View>
 
             <Text style={styles.reminderText}>No Olvides Medirte</Text>
 
@@ -43,8 +49,8 @@ const MainMenuScreen = () => {
             </View>
 
             <View style={styles.warningContainer}>
-                <TouchableOpacity onPress={() => alert('¡Cuidado! Revisa tus niveles.')}>
-                    <Image source={require('../assets/warning.png')} style={styles.warningIcon} />
+                <TouchableOpacity onPress={handleWarningPress}>
+                    <Image source={require('../assets/warning-icon.png')} style={styles.warningIcon} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -65,7 +71,7 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         color: '#1D3557',
-        fontFamily: 'Inder_400Regular', // Asegúrate de tener esta fuente instalada
+        fontFamily: 'Inder_400Regular',
     },
     avatar: {
         width: 100,
