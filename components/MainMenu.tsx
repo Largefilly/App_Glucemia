@@ -5,7 +5,7 @@ import { SafeAreaView, Text, StyleSheet } from 'react-native';
 const MainMenuScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Menu Principal WAAA</Text>
+      <Text style={styles.title}>Menu Principal</Text>
     </SafeAreaView>
   );
 };
