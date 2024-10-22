@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
+import { MaterialIcons } from '@expo/vector-icons'; // Importamos el ícono del menú
+import { DrawerActions } from '@react-navigation/native';
 
-const MainMenuScreen = () => {
+const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
+    const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
+    const handleMenuPress = () => {
+        navigation.dispatch(DrawerActions.openDrawer());
+    };
 
     // Función para generar un valor aleatorio entre 70 y 200
     const getRandomGlucoseLevel = () => {
@@ -18,6 +25,10 @@ const MainMenuScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
+                {/* Botón de menú para abrir el Drawer */}
+                <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+                    <MaterialIcons name="menu" size={30} color="#1D3557" /> 
+                </TouchableOpacity>
                 <Text style={styles.title}>Hola Cindy</Text>
             </View>
 
@@ -65,7 +76,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 15,
         marginTop: 10,
+    },
+    menuButton: {
+        paddingRight: 20,
     },
     title: {
         fontSize: 28,
@@ -134,4 +153,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MainMenuScreen;
+export default HomeScreen;
