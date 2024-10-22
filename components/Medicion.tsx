@@ -21,7 +21,7 @@ const MainMenuScreen = () => {
                 <Text style={styles.title}>Hola Cindy</Text>
             </View>
 
-            <Image source={require('../assets/avatar.png')} style={styles.avatar} /> 
+            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} /> 
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
@@ -50,7 +50,7 @@ const MainMenuScreen = () => {
 
             <View style={styles.warningContainer}>
                 <TouchableOpacity onPress={handleWarningPress}>
-                    <Image source={require('../assets/warning-icon.png')} style={styles.warningIcon} />
+                    <Image source={require('../assets/warning.png')} style={styles.warningIcon} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
