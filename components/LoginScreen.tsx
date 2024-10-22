@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
           <Text style={styles.title}>Bienvenido a Glucoller</Text>
         {/* Cambiar Logo */}
-          <Image source={require('../assets/favicon.png')} style={styles.logo} /> 
+          <Image source={require('../assets/glucoller.png')} style={styles.logo} /> 
     
           <TextInput
             style={styles.input}
@@ -74,13 +74,13 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       marginBottom: 30,
       color: '#1D3557',
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder', 
     },
     logo: {
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         alignSelf: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
     },
 
     input: {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
       marginBottom: 15,
       paddingHorizontal: 10,
       backgroundColor: '#F9F9F9',
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder',   // Aplicar la fuente Inder
     },
     forgotPassword: {
       textAlign: 'center',
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
       textDecorationLine: 'underline',
       
       marginBottom: 20,
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder',   // Aplicar la fuente Inder
     },
     loginButton: {
       backgroundColor: '#E53945',
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontWeight: 'bold',
       fontSize: 16,
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder',   // Aplicar la fuente Inder
     },
     orText: {
       textAlign: 'center',
       marginBottom: 10,
       color: '#2C3E50',
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder',   // Aplicar la fuente Inder
     },
     createAccountButton: {
       backgroundColor: '#457B9D',
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontWeight: 'bold',
       fontSize: 16,
-      fontFamily: 'Inder_400Regular',  // Aplicar la fuente Inder
+      fontFamily: 'Inder',   // Aplicar la fuente Inder
     },
   });
 
