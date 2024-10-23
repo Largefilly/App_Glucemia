@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     top: 36,
     left: 25,
     zIndex: 3,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
     fontSize: 30,
@@ -98,12 +98,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     top: -16,
     marginBottom: 30,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   addButton: {
     padding: 10,
-    fontFamily: 'Inder', // Fuente personalizada
+    fontFamily: 'Inder_400Regular', // Fuente personalizada
     color: '#1D3557',
     position: 'absolute', // Posiciona el botón de manera absoluta
     top: 36, // Distancia desde la parte superior
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
 },
   addButtonGrupo:{
     padding: 10,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557',
   },
   searchBar: {
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
     textAlign: 'center', // Centra el texto en la barra
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color del texto a #1D3557
   },
   contactList: {
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 18,
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color a #1D3557
   },
   line: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center', // Centra la palabra "Grupos"
     flex: 1, // Hace que el texto ocupe el espacio disponible para centrarlo
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color a #1D3557
   },
 });

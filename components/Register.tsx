@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F9F9F9',
-    fontFamily: 'Inder', // Aplicar la fuente a los inputs
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los inputs
   },
   dateRow: {
     flexDirection: 'row',
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    fontFamily: 'Inder', // Aplicar la fuente a Picker
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a Picker
   },
   buttonRow: {
     flexDirection: 'row',
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     //fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'Inder', // Aplicar la fuente a los botones
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los botones
   },
 });
 

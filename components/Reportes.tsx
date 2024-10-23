@@ -225,10 +225,10 @@ const MeasurementCard = ({ title }) => {
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
       <View style={styles.cardChart}>
-        <Text style={{ color: '#50E055', fontFamily: 'Inder'}}>{normal}%</Text>
-        <Text style={{ color: '#F0F05F', fontFamily: 'Inder'}}>{precaucion}%</Text>
-        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder'}}>{hipo}%</Text>
-        <Text style={{ color: '#E53945', fontFamily: 'Inder'}}>{hiper}%</Text>
+        <Text style={{ color: '#50E055', fontFamily: 'Inder_400Regular'}}>{normal}%</Text>
+        <Text style={{ color: '#F0F05F', fontFamily: 'Inder_400Regular'}}>{precaucion}%</Text>
+        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder_400Regular'}}>{hipo}%</Text>
+        <Text style={{ color: '#E53945', fontFamily: 'Inder_400Regular'}}>{hiper}%</Text>
       </View>
     </View>
   );
@@ -237,7 +237,7 @@ const MeasurementCard = ({ title }) => {
 // Estilos
 const styles = StyleSheet.create({
   container: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     top: 33,
     left: 25,
     zIndex: 3,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
     fontSize: 30,
@@ -257,45 +257,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     top: -16,
     marginBottom: 30,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   tabNavigation: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 20,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButton: {
     padding: 10,
     marginHorizontal: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonSelected: {
     borderBottomColor: '#000',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1D3557',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   glucoseContainer: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     alignItems: 'center',
     marginVertical: 10,
   },
   lastMeasurementText: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     top: 10,
     marginTop: 5,
     color: '#1D3557',
   },
   sectionTitle: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     top: 10,
     fontSize: 18,
     marginTop: 20,
@@ -304,13 +304,13 @@ const styles = StyleSheet.create({
     color: '#1D3557',
   },
   previousMeasurements: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 20,
   },
   card: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     margin: 5,
     width: 80,
     height: 120,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cardTitle: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1D3557',
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
     textAlign: 'center',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   analysisTitle: {
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   histogramContainer: {
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 12,
     textAlign: 'center',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   contactsTitle: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   line: {
@@ -409,12 +409,12 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 16,
     flex: 1,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   contactDate: {
     fontSize: 12,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
 });

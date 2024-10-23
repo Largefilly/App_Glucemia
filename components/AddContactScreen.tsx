@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     top: 36,
     left: 20,
     zIndex: 3,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
     fontSize: 30,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     top: -16,
     marginBottom: 30,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   formContainer: {
