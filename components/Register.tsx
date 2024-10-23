@@ -128,21 +128,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     backgroundColor: '#fff',
   },
   backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
+    color: '#E53945',
+    padding: 10,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Inder', 
-    color: '#2C3E50',
+    marginBottom: 30,
+    fontFamily: 'Inder', // Añadir la fuente
+    color: '#1D3557', // Cambiar el color
   },
   input: {
     height: 50,

@@ -2,39 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Progress from 'react-native-progress';
-import GestureRecognizer from 'react-native-swipe-gestures';
 
 const { width } = Dimensions.get('window');
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
 
-  // Manejar el deslizamiento a la izquierda y derecha
-  const handleSwipeLeft = () => {
-    if (selectedTab === 'MedicionGlucosa') {
-      setSelectedTab('RegistroReporte');
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (selectedTab === 'RegistroReporte') {
-      setSelectedTab('MedicionGlucosa');
-    }
-  };
-
   return (
-    <GestureRecognizer
-      onSwipeLeft={handleSwipeLeft}
-      onSwipeRight={handleSwipeRight}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       {/* Flecha para regresar a la pantalla principal */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <FontAwesome name="arrow-left" size={24} color="black" />
+        <FontAwesome name="arrow-left" size={24} color="#e53945" />
       </TouchableOpacity>
 
       {/* Título "Reporte" */}
-      <Text style={styles.title}>Reporte</Text>
+      <Text style={styles.title}>Reportes</Text>
 
       {/* Pestañas de navegación */}
       <View style={styles.tabNavigation}>
@@ -42,28 +24,60 @@ const ReporteScreen = ({ navigation }) => {
           style={[styles.tabButton, selectedTab === 'MedicionGlucosa' && styles.tabButtonSelected]}
           onPress={() => setSelectedTab('MedicionGlucosa')}
         >
-          <Text style={styles.tabButtonText}>Medición de Glucosa</Text>
+          <Text style={styles.tabButtonText}>Medición de glucosa</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'RegistroReporte' && styles.tabButtonSelected]}
           onPress={() => setSelectedTab('RegistroReporte')}
         >
-          <Text style={styles.tabButtonText}>Registro del Reporte</Text>
+          <Text style={styles.tabButtonText}>Registro del reporte</Text>
         </TouchableOpacity>
       </View>
 
       {/* Contenido basado en la pestaña seleccionada */}
       {selectedTab === 'MedicionGlucosa' ? <MedicionGlucosa /> : <RegistroReporte />}
-    </GestureRecognizer>
+    </View>
   );
 };
 
 // Componente para "Medición de Glucosa"
 const MedicionGlucosa = () => {
-  const randomNumber = Math.floor(Math.random() * 100);
+  const [glucoseLevel, setGlucoseLevel] = useState(0);
+
+  useEffect(() => {
+    // Generar un número aleatorio entre 70 y 140 para simular una medición de glucosa
+    const randomGlucose = Math.floor(Math.random() * (200 - 70 + 1)) + 70;
+    setGlucoseLevel(randomGlucose);
+  }, []);
+
   return (
-    <View style={styles.tabContainer}>
-      <Text style={styles.tabText}>Medición de Glucosa: {randomNumber}</Text>
+    <View style={styles.glucoseContainer}>
+      <Progress.Circle
+        size={150}
+        progress={glucoseLevel / 140} // Normalizar la medición para el progreso
+        showsText={true}
+        formatText={() => `${glucoseLevel} mg/dl`}
+        color="#50E055"
+        unfilledColor="#1D3557"
+        borderWidth={0}
+        thickness={10}
+      />
+      <Text style={styles.lastMeasurementText}>
+        Última medición de glucosa
+      </Text>
+      <Text style={styles.lastMeasurementText}>
+       17/10/2024 | 22:00
+      </Text>
+
+      <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
+
+      {/* Gráficos de Mediciones Anteriores */}
+      <View style={styles.previousMeasurements}>
+        <MeasurementCard title="Semanal" />
+        <MeasurementCard title="Mensual" />
+        <MeasurementCard title="Trimestral" />
+        <MeasurementCard title="Anual" />
+      </View>
     </View>
   );
 };
@@ -173,12 +187,28 @@ const RegistroReporte = () => {
   );
 };
 
+// Componente para las tarjetas de medición (Semanal, Mensual, Trimestral, Anual)
+const MeasurementCard = ({ title }) => {
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      <View style={styles.cardChart}>
+        <Text>64%</Text>
+        <Text>20%</Text>
+        <Text>10%</Text>
+        <Text>6%</Text>
+      </View>
+    </View>
+  );
+};
+
 // Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
+    backgroundColor: '#fff',
   },
   backButton: {
     padding: 10,
@@ -211,19 +241,46 @@ const styles = StyleSheet.create({
   tabButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'Inder', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
-  tabContainer: {
+  glucoseContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 50,
+    marginVertical: 10,
   },
-  tabText: {
+  lastMeasurementText: {
+    marginTop: 2,
+    color: '#1D3557',
+    
+  },
+  sectionTitle: {
     fontSize: 18,
+    marginTop: 20,
     fontWeight: 'bold',
-    fontFamily: 'Inder', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    textAlign: 'center',
+    color: '#1D3557',
+  },
+  previousMeasurements: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  card: {
+    width: 80,
+    height: 120,
+    backgroundColor: '#f0faf8',
+    borderRadius: 10,
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1D3557',
+    marginBottom: 10,
+  },
+  cardChart: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   chartContainer: {
     flexDirection: 'column',
@@ -231,9 +288,9 @@ const styles = StyleSheet.create({
   },
   horizontalCharts: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Para espacio igual entre los gráficos
+    justifyContent: 'space-around',
     width: '100%',
-    marginBottom: 20,
+    marginTop: 20,
   },
   chartItem: {
     alignItems: 'center',
@@ -246,7 +303,7 @@ const styles = StyleSheet.create({
     color: '#1D3557', // Cambiar el color
   },
   analysisTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
@@ -277,7 +334,7 @@ const styles = StyleSheet.create({
     color: '#1D3557', // Cambiar el color
   },
   contactsTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
@@ -292,7 +349,7 @@ const styles = StyleSheet.create({
   contactsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   contactCircle: {
     width: 30,
@@ -312,6 +369,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inder', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
+
 });
 
 export default ReporteScreen;
