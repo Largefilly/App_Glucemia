@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, Text, TextInput, Button, StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';  // Importar Picker
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = ({ navigation }) => {
@@ -42,16 +43,17 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert('Error', 'Ocurrió un error al registrar tu cuenta.');
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* Botón de regreso */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <FontAwesome name="arrow-left" size={24} color="red" />
-      </TouchableOpacity>
+      {/* Botón de regreso y título */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#FF3B30" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Registro</Text>
+      </View>
 
-      <Text style={styles.title}>Registro</Text>
-
+      {/* Campos del formulario */}
       <TextInput
         style={styles.input}
         placeholder="Nombre *"
@@ -97,12 +99,20 @@ const RegisterScreen = ({ navigation }) => {
         />
       </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Tipo de enfermedad *"
-        value={form.enfermedad}
-        onChangeText={(text) => handleChange('enfermedad', text)}
-      />
+       {/* Selector de tipo de enfermedad */}
+       <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.enfermedad}
+          onValueChange={(itemValue) => handleChange('enfermedad', itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Tipo de enfermedad *" value="" enabled={false} /> 
+          <Picker.Item label="Tipo 1" value="Tipo 1" />
+          <Picker.Item label="Tipo 2" value="Tipo 2" />
+          <Picker.Item label="Prediabetes" value="Prediabetes" />
+          <Picker.Item label="No tengo diabetes" value="No tengo diabetes" />
+        </Picker>
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Contraseña *"
@@ -127,21 +137,25 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 30,
     backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   backButton: {
-    color: '#E53945',
-    padding: 10,
+    marginRight: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#1D3557',
+    flex: 1,
     textAlign: 'center',
-    marginBottom: 30,
-    fontFamily: 'Inder', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    fontFamily: 'Inder', // Aplicar la fuente
   },
   input: {
     height: 50,
@@ -151,7 +165,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F9F9F9',
-    fontFamily: 'Inder', 
+    fontFamily: 'Inder', // Aplicar la fuente a los inputs
   },
   dateRow: {
     flexDirection: 'row',
@@ -161,13 +175,24 @@ const styles = StyleSheet.create({
   dateInput: {
     width: '30%',
   },
+  pickerContainer: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 15,
+    backgroundColor: '#F9F9F9',
+  },
+  picker: {
+    height: 50,
+    fontFamily: 'Inder', // Aplicar la fuente a Picker
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
   },
   cancelButton: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: '#FF3B30',
     paddingVertical: 15,
     borderRadius: 10,
     flex: 1,
@@ -175,7 +200,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   nextButton: {
-    backgroundColor: '#2980B9',
+    backgroundColor: '#1D84B5',
     paddingVertical: 15,
     borderRadius: 10,
     flex: 1,
@@ -184,9 +209,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'Inder',
+    fontFamily: 'Inder', // Aplicar la fuente a los botones
   },
 });
 
