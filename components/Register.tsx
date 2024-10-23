@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   cancelButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#E53945',
     paddingVertical: 15,
     borderRadius: 10,
     flex: 1,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   nextButton: {
-    backgroundColor: '#1D84B5',
+    backgroundColor: '#457B9D',
     paddingVertical: 15,
     borderRadius: 10,
     flex: 1,
