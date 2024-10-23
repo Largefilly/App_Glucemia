@@ -47,11 +47,12 @@ const RegisterScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       {/* Botón de regreso y título */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="#FF3B30" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesome name="arrow-left" size={24} color="#E53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Registro</Text>
       </View>
+      
 
       {/* Campos del formulario */}
       <TextInput
@@ -143,8 +144,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: 'center', // Alinear ícono de retroceso y título en el centro vertical
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10,
+    marginBottom: 80,
   },
   backButton: {
     marginRight: 10,
@@ -152,10 +156,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1D3557',
-    flex: 1,
     textAlign: 'center',
-    fontFamily: 'Inder', // Aplicar la fuente
+    flex: 1, // Esto asegura que el título se centre en el espacio disponible
+    color: '#1D3557',
+    fontFamily: 'Inder_400Regular', // Aplicar fuente Inder
   },
   input: {
     height: 50,
