@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     menuButton: {
         position: 'absolute',
         paddingRight: 20,
-        color:'#e53945',
+        color: '#E53945',
     },
     title: {
         fontSize: 36,
