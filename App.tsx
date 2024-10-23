@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -12,14 +11,22 @@ import { ActivityIndicator } from 'react-native';
 
 // Pantallas Importadas
 import LoginScreen from './components/LoginScreen';
-import RegisterScreen from './components/Register'; // Cambié a RegisterScreen para seguir el estilo anterior
+import RegisterScreen from './components/Register';
 import HomeScreen from './components/MainMenu';
 import ReporteScreen from './components/Reportes';
 import ContactoScreen from './components/Contactos';
+import AddContactScreen from './components/AddContactScreen'; // Asegúrate de que esta pantalla esté importada
 
 // Pantallas Añadidas
-import AddContactScreen from './components/AddContactScreen';
 import ProfileScreen from './components/ProfileScreen';
+
+// Pantallas de Configuración (que no aparecerán en el Drawer)
+import LanguageScreen from './components/LanguageScreen';
+import SupportScreen from './components/SupportScreen';
+import RemindersScreen from './components/RemindersScreen';
+import ThemeScreen from './components/ThemeScreen';
+import PrivacyPolicyScreen from './components/PrivacyPolicyScreen';
+import EditProfileScreen from './components/EditProfileScreen';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator(); // Creamos el Drawer Navigator
@@ -31,6 +38,13 @@ type RootStackParamList = {
   Home: undefined;
   Reporte: undefined;
   Contactos: undefined;
+  AddContact: undefined; // Añadimos la ruta para la pantalla de agregar contacto
+  Profile: undefined;
+  Language: undefined;
+  Support: undefined;
+  Reminders: undefined;
+  Theme: undefined;
+  PrivacyPolicy: undefined;
 };
 
 const loadFonts = async () => {
@@ -38,6 +52,7 @@ const loadFonts = async () => {
     'Inder': require('./assets/fonts/Inder-Regular.ttf'),
   });
 };
+
 const App: React.FC = () => {
   const [fontsLoaded] = useFonts({
     Inder_400Regular,
@@ -72,9 +87,10 @@ const App: React.FC = () => {
   // Creamos el Drawer Navigator para las pantallas dentro del menú principal
   const DrawerNavigator = () => (
     <Drawer.Navigator initialRouteName="MainMenu">
+      {/* Solo estas pantallas aparecerán en el Drawer */}
       <Drawer.Screen name="Main Menu" component={HomeScreen} options={{ headerShown: false }} />
-      <Drawer.Screen name="Reportes" component={ReporteScreen}  options={{ headerShown: false }}/>
-      <Drawer.Screen name="Contactos" component={ContactoScreen}  options={{ headerShown: false }}/>
+      <Drawer.Screen name="Reportes" component={ReporteScreen} options={{ headerShown: false }} />
+      <Drawer.Screen name="Contactos" component={ContactoScreen} options={{ headerShown: false }} />
       <Drawer.Screen name="Perfil de Usuario" component={ProfileScreen} options={{ headerShown: false }} />
     </Drawer.Navigator>
   );
@@ -99,6 +115,52 @@ const App: React.FC = () => {
         <Stack.Screen
           name="MainMenu"
           component={DrawerNavigator}
+          options={{ headerShown: false }}
+        />
+
+        {/* Pantalla de agregar contacto */}
+        <Stack.Screen
+          name="AddContact"
+          component={AddContactScreen}
+          options={{ headerShown: false }}
+        />
+
+        {/* Pantallas de perfil y configuración */}
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{ headerShown: false }}
+        />
+
+        {/* Pantallas de configuración (no visibles en el Drawer) */}
+        <Stack.Screen
+          name="Language"
+          component={LanguageScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Support"
+          component={SupportScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Reminders"
+          component={RemindersScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Theme"
+          component={ThemeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

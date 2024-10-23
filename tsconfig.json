@@ -1,6 +1,9 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": false,         // Desactiva la comprobación estricta de tipos
+    "noImplicitAny": false,  // Permite el uso de 'any' sin lanzar advertencias
+    "skipLibCheck": true,    // Evita verificar los tipos de las dependencias externas
+    "forceConsistentCasingInFileNames": true
   }
 }

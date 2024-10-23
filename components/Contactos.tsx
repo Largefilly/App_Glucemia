@@ -28,7 +28,7 @@ const ContactoScreen = ({ navigation }) => {
           <FontAwesome name="arrow-left" size={24} color="#1D3557" />
         </TouchableOpacity>
         <Text style={styles.title}>Contactos</Text>
-        <TouchableOpacity onPress={() => console.log('Agregar nuevo contacto')} style={styles.addButton}>
+        <TouchableOpacity onPress={() => navigation.navigate('AddContact')} style={styles.addButton}>
           <FontAwesome name="plus" size={24} color="#1D3557" />
         </TouchableOpacity>
       </View>
