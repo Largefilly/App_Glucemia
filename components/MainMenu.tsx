@@ -138,12 +138,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     menuButton: {
+        top:-22,
         left: 30,
         position: 'absolute',
         color: '#E53945',
     },
     title: {
-        fontSize: 36,
+        fontSize: 30,
         fontWeight: 'bold',
         color: '#1D3557',
         fontFamily: 'Inder_400Regular',

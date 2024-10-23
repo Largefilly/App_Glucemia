@@ -40,24 +40,53 @@ const ReporteScreen = ({ navigation }) => {
   );
 };
 
+const generateRandomPercentages = () => {
+  // Generar 4 números aleatorios
+  const randomNumbers = [Math.random(), Math.random(), Math.random(), Math.random()];
+
+  // Calcular la suma de los números aleatorios
+  const total = randomNumbers.reduce((acc, val) => acc + val, 0);
+  
+  // Calcular los porcentajes
+  const normal = (randomNumbers[0] / total) * 100;
+  const precaucion = (randomNumbers[1] / total) * 100;
+  const hipo = (randomNumbers[2] / total) * 100;
+  const hiper = (randomNumbers[3] / total) * 100;
+
+  return [
+    normal.toFixed(2),
+    precaucion.toFixed(2),
+    hipo.toFixed(2),
+    hiper.toFixed(2)
+  ];
+};
+
 // Componente para "Medición de Glucosa"
 const MedicionGlucosa = () => {
   const [glucoseLevel, setGlucoseLevel] = useState(0);
 
   useEffect(() => {
-    // Generar un número aleatorio entre 70 y 140 para simular una medición de glucosa
+    // Generar un número aleatorio entre 70 y 200 para simular una medición de glucosa
     const randomGlucose = Math.floor(Math.random() * (200 - 70 + 1)) + 70;
     setGlucoseLevel(randomGlucose);
   }, []);
+
+  // Función para obtener el color según el nivel de glucosa
+  const getGlucoseColor = (level) => {
+    if (level < 70) return '#6FB5E1'; // Hipoglucemia
+    if (level >= 70 && level <= 110) return '#50E055'; // Normal
+    if (level > 110 && level <= 140) return '#F0F05F'; // Precaución
+    return '#E53945'; // Hiperglucemia
+  };
 
   return (
     <View style={styles.glucoseContainer}>
       <Progress.Circle
         size={150}
-        progress={glucoseLevel / 140} // Normalizar la medición para el progreso
+        progress={glucoseLevel / 200} // Normalizar la medición para el progreso
         showsText={true}
         formatText={() => `${glucoseLevel} mg/dl`}
-        color="#50E055"
+        color={getGlucoseColor(glucoseLevel)} // Usar el color basado en el nivel de glucosa
         unfilledColor="#1D3557"
         borderWidth={0}
         thickness={10}
@@ -81,6 +110,7 @@ const MedicionGlucosa = () => {
     </View>
   );
 };
+
 
 // Componente para "Registro del Reporte"
 const RegistroReporte = () => {
@@ -189,14 +219,16 @@ const RegistroReporte = () => {
 
 // Componente para las tarjetas de medición (Semanal, Mensual, Trimestral, Anual)
 const MeasurementCard = ({ title }) => {
+  const [normal, precaucion, hipo, hiper] = generateRandomPercentages();
+
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
       <View style={styles.cardChart}>
-        <Text>64%</Text>
-        <Text>20%</Text>
-        <Text>10%</Text>
-        <Text>6%</Text>
+        <Text style={{ color: '#50E055', fontFamily: 'Inder'}}>{normal}%</Text>
+        <Text style={{ color: '#F0F05F', fontFamily: 'Inder'}}>{precaucion}%</Text>
+        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder'}}>{hipo}%</Text>
+        <Text style={{ color: '#E53945', fontFamily: 'Inder'}}>{hiper}%</Text>
       </View>
     </View>
   );
@@ -205,6 +237,7 @@ const MeasurementCard = ({ title }) => {
 // Estilos
 const styles = StyleSheet.create({
   container: {
+    fontFamily: 'Inder',
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
@@ -213,13 +246,16 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 10,
     position: 'absolute',
-    top: 60,
-    left: 20,
+    top: 33,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
+    top: -16,
     marginBottom: 30,
     fontFamily: 'Inder', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
@@ -228,31 +264,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 20,
+    fontFamily: 'Inder', // Añadir la fuente
   },
   tabButton: {
     padding: 10,
     marginHorizontal: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    fontFamily: 'Inder', // Añadir la fuente
   },
   tabButtonSelected: {
     borderBottomColor: '#000',
+    fontFamily: 'Inder', // Añadir la fuente
   },
   tabButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1D3557',
+    fontFamily: 'Inder', // Añadir la fuente
   },
   glucoseContainer: {
+    fontFamily: 'Inder',
     alignItems: 'center',
     marginVertical: 10,
   },
   lastMeasurementText: {
-    marginTop: 2,
+    fontFamily: 'Inder',
+    top: 10,
+    marginTop: 5,
     color: '#1D3557',
-    
   },
   sectionTitle: {
+    fontFamily: 'Inder',
+    top: 10,
     fontSize: 18,
     marginTop: 20,
     fontWeight: 'bold',
@@ -260,11 +304,14 @@ const styles = StyleSheet.create({
     color: '#1D3557',
   },
   previousMeasurements: {
+    fontFamily: 'Inder',
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 20,
   },
   card: {
+    fontFamily: 'Inder',
+    margin: 5,
     width: 80,
     height: 120,
     backgroundColor: '#f0faf8',
@@ -273,6 +320,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cardTitle: {
+    fontFamily: 'Inder',
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1D3557',
@@ -369,7 +417,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inder', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
-
 });
 
 export default ReporteScreen;
