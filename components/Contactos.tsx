@@ -25,11 +25,11 @@ const ContactoScreen = ({ navigation }) => {
       {/* Encabezado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="#1D3557" />
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Contactos</Text>
         <TouchableOpacity onPress={() => console.log('Agregar nuevo contacto')} style={styles.addButton}>
-          <FontAwesome name="plus" size={24} color="#1D3557" />
+          <FontAwesome name="plus" size={24} color="#e53945" />
         </TouchableOpacity>
       </View>
 
@@ -54,7 +54,7 @@ const ContactoScreen = ({ navigation }) => {
         <View style={styles.groupHeader}>
           <Text style={styles.groupTitle}>Grupos</Text>
           <TouchableOpacity onPress={() => console.log('Agregar nuevo grupo')} style={styles.addButton}>
-            <FontAwesome name="plus" size={24} color="#1D3557" />
+            <FontAwesome name="plus" size={24} color="#e53945" />
           </TouchableOpacity>
         </View>
 
