@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
     flex: 1, // Esto asegura que el título se centre en el espacio disponible

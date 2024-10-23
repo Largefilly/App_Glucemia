@@ -54,14 +54,12 @@ const AddContactScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior="padding" >
       {/* Contenedor para el título y el botón de retroceso */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} >
+        <TouchableOpacity onPress={() => navigation.goBack()}style={styles.backButton} >
           <FontAwesome name="arrow-left" size={24} color="#E53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Agregar contacto</Text>
-      </View>
 
       {/* Contenedor que centra el formulario */}
       <View style={styles.formContainer}>
@@ -166,13 +164,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 10,
   },
+  backButton: {
+    padding: 10,
+    position: 'absolute',
+    top: 36,
+    left: 20,
+    zIndex: 3,
+    fontFamily: 'Inder', // Añadir la fuente
+  },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    flex: 1, // Esto asegura que el título se centre en el espacio disponible
-    color: '#000',
-    fontFamily: 'Inder_400Regular', // Aplicar fuente Inder
+    top: -16,
+    marginBottom: 30,
+    fontFamily: 'Inder', // Añadir la fuente
+    color: '#1D3557', // Cambiar el color
   },
   formContainer: {
     flex: 1,
