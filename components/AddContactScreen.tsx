@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 // Definir los tipos del Stack Navigator
 type RootStackParamList = {
@@ -55,8 +57,8 @@ const AddContactScreen: React.FC<Props> = ({ navigation }) => {
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       {/* Contenedor para el título y el botón de retroceso */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={30} color="#000" />
+        <TouchableOpacity onPress={() => navigation.goBack()} >
+          <FontAwesome name="arrow-left" size={24} color="#E53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Agregar contacto</Text>
       </View>
@@ -150,13 +152,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 50,
     backgroundColor: '#fff',
     justifyContent: 'space-between',
+
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center', // Alinear ícono de retroceso y título en el centro vertical
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 15,
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,
