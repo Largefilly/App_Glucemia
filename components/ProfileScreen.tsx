@@ -144,9 +144,9 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: '100%',
-    height: 250, // Altura del fondo
+    height: 200, // Reducido el fondo a 200 (de 250)
     backgroundColor: '#a8dadb', // Verde Agua
-    borderBottomLeftRadius: 0, // Bordes curvados en la parte inferior
+    borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     position: 'absolute',
     top: 0,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   profileContainer: {
-    marginTop: 180, // Ajusta para que la imagen quede centrada con el fondo curvado
+    marginTop: 120, // Movido más arriba a 120 para ajustarse a la nueva altura del fondo
     alignItems: 'center',
   },
   profileImageWrapper: {
