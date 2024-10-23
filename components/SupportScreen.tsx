@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const SupportScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -15,8 +16,8 @@ const SupportScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header sin fondo, con título y botón de retroceso */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="chevron-left" size={30} color="#e53945" />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Soporte</Text>
       </View>

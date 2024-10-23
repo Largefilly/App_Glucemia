@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { FontAwesome } from '@expo/vector-icons';
 
 type RootStackParamList = {
   Profile: undefined;
@@ -31,8 +32,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       {/* Fondo curvado en la parte superior */}
       <View style={styles.headerBackground}>
         {/* Botón de retroceso */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={30} color="#e53945" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
       </View>
 
