@@ -23,15 +23,15 @@ const ContactoScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* Encabezado */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="#E53945" />
+      
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <FontAwesome name="arrow-left" size={24} color="#E53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Contactos</Text>
         <TouchableOpacity onPress={() => navigation.navigate('AddContact')} style={styles.addButton}>
           <FontAwesome name="plus" size={24} color="#E53945" />
         </TouchableOpacity>
-      </View>
+      
 
       {/* Barra de búsqueda */}
       <TextInput
@@ -53,7 +53,7 @@ const ContactoScreen = ({ navigation }) => {
         {/* Título Grupos */}
         <View style={styles.groupHeader}>
           <Text style={styles.groupTitle}>Grupos</Text>
-          <TouchableOpacity onPress={() => console.log('Agregar nuevo grupo')} style={styles.addButton}>
+          <TouchableOpacity onPress={() => console.log('Agregar nuevo grupo')} style={styles.addButtonGrupo}>
             <FontAwesome name="plus" size={24} color="#E53945" />
           </TouchableOpacity>
         </View>
@@ -85,19 +85,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   backButton: {
-    color: '#E53945',
     padding: 10,
+    position: 'absolute',
+    top: 36,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    flex: 1,
-    fontFamily: 'Inder', // Aplica la fuente Inder
-    color: '#1D3557', // Cambia el color a #1D3557
+    top: -16,
+    marginBottom: 30,
+    fontFamily: 'Inder', // Añadir la fuente
+    color: '#1D3557', // Cambiar el color
   },
   addButton: {
     padding: 10,
+    fontFamily: 'Inder', // Fuente personalizada
+    color: '#1D3557',
+    position: 'absolute', // Posiciona el botón de manera absoluta
+    top: 36, // Distancia desde la parte superior
+    right: 25, // Distancia desde la parte derecha
+    zIndex: 10, // Asegura que el botón esté sobre otros elementos
+},
+  addButtonGrupo:{
+    padding: 10,
+    fontFamily: 'Inder', // Añadir la fuente
+    color: '#1D3557',
   },
   searchBar: {
     height: 40,
@@ -134,7 +150,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   groupTitle: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center', // Centra la palabra "Grupos"
     flex: 1, // Hace que el texto ocupe el espacio disponible para centrarlo
