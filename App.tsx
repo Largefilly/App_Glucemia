@@ -72,10 +72,10 @@ const App: React.FC = () => {
   // Creamos el Drawer Navigator para las pantallas dentro del menú principal
   const DrawerNavigator = () => (
     <Drawer.Navigator initialRouteName="MainMenu">
-      <Drawer.Screen name="Main Menu" component={HomeScreen} />
-      <Drawer.Screen name="Reportes" component={ReporteScreen} />
-      <Drawer.Screen name="Contactos" component={ContactoScreen} />
-      <Drawer.Screen name="Perfil de Usuario" component={ProfileScreen} />
+      <Drawer.Screen name="Main Menu" component={HomeScreen} options={{ headerShown: false }} />
+      <Drawer.Screen name="Reportes" component={ReporteScreen}  options={{ headerShown: false }}/>
+      <Drawer.Screen name="Contactos" component={ContactoScreen}  options={{ headerShown: false }}/>
+      <Drawer.Screen name="Perfil de Usuario" component={ProfileScreen} options={{ headerShown: false }} />
     </Drawer.Navigator>
   );
 
