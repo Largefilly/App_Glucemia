@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   Profile: undefined;
@@ -21,11 +22,36 @@ interface Props {
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
 
   // Eliminar el header al cargar la pantalla
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
+    loadUserData();
   }, [navigation]);
+
+  const loadUserData = async () => {
+    try {
+      const name = await AsyncStorage.getItem('userName'); // Obtener el nombre
+      const lastName = await AsyncStorage.getItem('userLastName'); // Obtener el apellido
+      const email = await AsyncStorage.getItem('userEmail')
+      if (name) {
+        const names = name.split(' ');
+        setFirstName(names[0]); // Solo el primer nombre
+      }
+      if (lastName) {
+        const lastNames = lastName.split(' ');
+        setLastName(lastNames[0]); // Solo el primer apellido
+      }
+      if (email) {
+        setEmail(email)
+      }
+    } catch (error) {
+      console.error('Error loading user data', error);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -48,8 +74,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
             <Icon name="pencil" size={20} color="#000" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.profileName}>Cindy Nero</Text>
-        <Text style={styles.profileEmail}>youremail@domain.com</Text>
+        <Text style={styles.profileName}>{firstName} {lastName}</Text>
+        <Text style={styles.profileEmail}>{email}</Text>
       </View>
 
       {/* Secciones de Configuración */}
@@ -144,7 +170,7 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: '100%',
-    height: 200, // Reducido el fondo a 200 (de 250)
+    height: 180, // Reducido el fondo a 200 (de 250)
     backgroundColor: '#a8dadb', // Verde Agua
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
@@ -153,8 +179,12 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   backButton: {
-    marginTop: 50,
-    marginLeft: 20,
+    padding: 10,
+    position: 'absolute',
+    top: 33,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   profileContainer: {
     marginTop: 120, // Movido más arriba a 120 para ajustarse a la nueva altura del fondo
@@ -183,14 +213,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#1D3557',
-    marginTop: 10,
+    marginTop: 5,
   },
   profileEmail: {
     fontSize: 14,
     color: '#666',
   },
   section: {
-    marginTop: 20,
+    marginTop: 5,
     paddingHorizontal: 20,
   },
   sectionItemNoBackground: {

@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 10,
     position: 'absolute',
-    top: 36,
+    top: 33,
     left: 25,
     zIndex: 3,
     fontFamily: 'Inder_400Regular', // Añadir la fuente
