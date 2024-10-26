@@ -13,8 +13,8 @@ import { StatusBar, SafeAreaView, ActivityIndicator } from 'react-native';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/Register';
 import HomeScreen from './components/MainMenu';
-import ReporteScreen from './components/Reportes';
-import ContactoScreen from './components/Contactos';
+import ReporteScreen from './components/Reports';
+import ContactoScreen from './components/Contacts';
 import AddContactScreen from './components/AddContactScreen'; // Asegúrate de que esta pantalla esté importada
 import ProfileScreen from './components/ProfileScreen';
 

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';  // Importar AsyncStorage
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
 import { MaterialIcons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
@@ -7,7 +8,25 @@ import { DrawerActions } from '@react-navigation/native';
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
     const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
+    const [userName, setUserName] = useState(''); // Estado para almacenar el nombre del usuario
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
+
+    useEffect(() => {
+        // Cargar el nombre del usuario desde AsyncStorage
+        const loadUserName = async () => {
+            try {
+                const name = await AsyncStorage.getItem('userName');
+                if (name) {
+                    const firstName = name.split(' ')[0]; // Toma solo el primer nombre
+                    setUserName(firstName);
+                }
+            } catch (error) {
+                console.log('Error cargando el nombre del usuario', error);
+            }
+        };
+
+        loadUserName(); // Llamar a la función al cargar la pantalla
+    }, []);
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
@@ -56,8 +75,10 @@ const HomeScreen = () => {
             return '#E53945'; // Rojo para hiperglucemia
         } else if (glucose >= 131 && glucose <= 179) {
             return '#FFEB3B'; // Amarillo para precaución
-        } else {
+        } else if (glucose >= 71 && glucose <= 130){
             return '#A4C639'; // Verde para normal
+        } else {
+            return '#1D3557';
         }
     };
 
@@ -69,7 +90,8 @@ const HomeScreen = () => {
                     <MaterialIcons name="menu" size={35} color="#e53945" /> 
                 </TouchableOpacity>
             </View>
-            <Text style={styles.title}>Hola Cindy</Text>
+            {/* Mostrar el nombre del usuario registrado */}
+            <Text style={styles.title}>Hola, {userName}</Text>
 
             <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} /> 
 
@@ -120,7 +142,7 @@ const HomeScreen = () => {
             </View>
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -151,8 +173,8 @@ const styles = StyleSheet.create({
         marginTop: -25,
     },
     avatar: {
-        width: 150,
-        height: 150,
+        width: 137,
+        height: 137,
         borderRadius: 50,
         marginTop: 20,
         marginBottom: 20,
@@ -163,10 +185,10 @@ const styles = StyleSheet.create({
         fontFamily: 'Inder_400Regular',
     },
     circleContainer: {
-        width: 100,
-        height: 100,
+        width: 110,
+        height: 110,
         borderRadius: 75,
-        borderWidth: 5,
+        borderWidth: 9,
         justifyContent: 'center',
         alignItems: 'center',
         marginVertical: 20,
@@ -195,6 +217,8 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     statusButton: {
+        marginLeft:5,
+        width:124,
         margin: 5,
         justifyContent: 'center',
         paddingVertical: 10,
@@ -213,9 +237,10 @@ const styles = StyleSheet.create({
         marginTop: 30,
     },
     warningIcon: {
-        right: 20,
-        width: 70,
-        height: 70,
+        marginTop:20,
+        
+        width: 80,
+        height: 80,
     },
 });
 

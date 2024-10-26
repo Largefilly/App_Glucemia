@@ -82,10 +82,13 @@ const MedicionGlucosa = () => {
   return (
     <View style={styles.glucoseContainer}>
       <Progress.Circle
+        style={{ marginTop: 10 }} 
         size={150}
-        progress={glucoseLevel / 200} // Normalizar la medición para el progreso
+        progress={glucoseLevel / 180} // Normalizar la medición para el progreso
         showsText={true}
-        formatText={() => `${glucoseLevel} mg/dl`}
+        formatText={() => (
+          <Text style={styles.glucoseTextStyle}>{`${glucoseLevel} mg/dl`}</Text>
+        )}
         color={getGlucoseColor(glucoseLevel)} // Usar el color basado en el nivel de glucosa
         unfilledColor="#1D3557"
         borderWidth={0}
@@ -136,47 +139,57 @@ const RegistroReporte = () => {
 
   return (
     <View style={styles.chartContainer}>
-      {/* Gráfico Normal y Precaución, Hiperglucemia y Hipoglucemia en fila */}
-      <View style={styles.horizontalCharts}>
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Normal y{"\n"}Precaución</Text>
-          <Progress.Circle
-            size={100}
-            progress={normalPrecautionPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(normalPrecautionPercentage * 100)}%`}
-            color="#50E055"
-            unfilledColor="#F0F05F"
-            borderWidth={0}
-          />
-        </View>
+  {/* Gráfico Normal y Precaución, Hiperglucemia y Hipoglucemia en fila */}
+  <View style={styles.horizontalCharts}>
+    
+    {/* Normal y Precaución */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Normal y{"\n"}Precaución</Text>
+      <Progress.Circle
+        size={100}
+        progress={normalPrecautionPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(normalPrecautionPercentage * 100)}%`}
+        color="#50E055"
+        unfilledColor="#F0F05F"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
 
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Hiperglucemia{"\n"}</Text>
-          <Progress.Circle
-            size={100}
-            progress={hyperglycemiaPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(hyperglycemiaPercentage * 100)}%`}
-            color="#E53945"
-            unfilledColor="#1D3557"
-            borderWidth={0}
-          />
-        </View>
+    {/* Hiperglucemia */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Hiperglucemia{"\n"}</Text>
+      <Progress.Circle
+        size={100}
+        progress={hyperglycemiaPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(hyperglycemiaPercentage * 100)}%`}
+        color="#E53945"
+        unfilledColor="#1D3557"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
 
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Hipoglucemia{"\n"}</Text>
-          <Progress.Circle
-            size={100}
-            progress={hypoglycemiaPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(hypoglycemiaPercentage * 100)}%`}
-            color="#6FB5E1"
-            unfilledColor="#1D3557"
-            borderWidth={0}
-          />
-        </View>
-      </View>
+    {/* Hipoglucemia */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Hipoglucemia{"\n"}</Text>
+      <Progress.Circle
+        size={100}
+        progress={hypoglycemiaPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(hypoglycemiaPercentage * 100)}%`}
+        color="#6FB5E1"
+        unfilledColor="#1D3557"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
+  </View>
 
       {/* Análisis del Reporte */}
       <Text style={styles.analysisTitle}>Análisis del Reporte</Text>
@@ -236,6 +249,11 @@ const MeasurementCard = ({ title }) => {
 
 // Estilos
 const styles = StyleSheet.create({
+  glucoseTextStyle: {
+    fontSize: 24, // Ajusta el tamaño de la fuente
+    color: '#1D3557', // Cambia el color a lo que prefieras
+    fontWeight: 'bold', // Puedes hacerla negrita si lo deseas
+  },  
   container: {
     fontFamily: 'Inder_400Regular',
     flex: 1,
@@ -255,7 +273,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    top: -16,
+    marginTop: -17,
     marginBottom: 30,
     fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
@@ -296,9 +314,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Inder_400Regular',
-    top: 10,
     fontSize: 18,
-    marginTop: 20,
+    marginTop: 70,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#1D3557',
