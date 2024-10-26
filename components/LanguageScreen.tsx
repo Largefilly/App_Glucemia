@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const LanguageScreen = ({ navigation }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('Español (America Latina)');
@@ -22,8 +22,8 @@ const LanguageScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header sin fondo, con título y botón de retroceso */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="chevron-left" size={30} color="#e53945" />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Idioma</Text>
       </View>

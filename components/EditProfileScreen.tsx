@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { FontAwesome } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const EditProfileScreen = ({ navigation }) => {
   const [name, setName] = useState('Cindy Nero');
@@ -21,8 +20,8 @@ const EditProfileScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header sin fondo, con título y botón de retroceso movidos más abajo */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="chevron-left" size={30} color="#E53945" />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Editar Perfil</Text>
       </View>

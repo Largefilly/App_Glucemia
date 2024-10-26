@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       marginBottom: 30,
       color: '#1D3557',
-      fontFamily: 'Inder', 
+      fontFamily: 'Inder_400Regular', 
     },
     logo: {
         width: 200,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
       marginBottom: 15,
       paddingHorizontal: 10,
       backgroundColor: '#F9F9F9',
-      fontFamily: 'Inder',   // Aplicar la fuente Inder
+      fontFamily: 'Inder_400Regular',   // Aplicar la fuente Inder
     },
     forgotPassword: {
       textAlign: 'center',
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
       textDecorationLine: 'underline',
       
       marginBottom: 20,
-      fontFamily: 'Inder',   // Aplicar la fuente Inder
+      fontFamily: 'Inder_400Regular',   // Aplicar la fuente Inder
     },
     loginButton: {
       backgroundColor: '#E53945',
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontWeight: 'bold',
       fontSize: 16,
-      fontFamily: 'Inder',   // Aplicar la fuente Inder
+      fontFamily: 'Inder_400Regular',   // Aplicar la fuente Inder
     },
     orText: {
       textAlign: 'center',
       marginBottom: 10,
       color: '#2C3E50',
-      fontFamily: 'Inder',   // Aplicar la fuente Inder
+      fontFamily: 'Inder_400Regular',   // Aplicar la fuente Inder
     },
     createAccountButton: {
       backgroundColor: '#457B9D',
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontWeight: 'bold',
       fontSize: 16,
-      fontFamily: 'Inder',   // Aplicar la fuente Inder
+      fontFamily: 'Inder_400Regular',   // Aplicar la fuente Inder
     },
   });
 

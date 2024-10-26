@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 // Definir los tipos del Stack Navigator
 type RootStackParamList = {
@@ -52,14 +54,12 @@ const AddContactScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior="padding" >
       {/* Contenedor para el título y el botón de retroceso */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={30} color="#000" />
+        <TouchableOpacity onPress={() => navigation.goBack()}style={styles.backButton} >
+          <FontAwesome name="arrow-left" size={24} color="#E53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Agregar contacto</Text>
-      </View>
 
       {/* Contenedor que centra el formulario */}
       <View style={styles.formContainer}>
@@ -150,21 +150,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 50,
     backgroundColor: '#fff',
     justifyContent: 'space-between',
+
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center', // Alinear ícono de retroceso y título en el centro vertical
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  backButton: {
+    padding: 10,
+    position: 'absolute',
+    top: 36,
+    left: 20,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    flex: 1, // Esto asegura que el título se centre en el espacio disponible
-    color: '#000',
-    fontFamily: 'Inder_400Regular', // Aplicar fuente Inder
+    top: -16,
+    marginBottom: 30,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
+    color: '#1D3557', // Cambiar el color
   },
   formContainer: {
     flex: 1,

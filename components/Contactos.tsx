@@ -25,13 +25,13 @@ const ContactoScreen = ({ navigation }) => {
       {/* Encabezado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="#e53945" />
+          <FontAwesome name="arrow-left" size={24} color="#1D3557" />
         </TouchableOpacity>
         <Text style={styles.title}>Contactos</Text>
         <TouchableOpacity onPress={() => console.log('Agregar nuevo contacto')} style={styles.addButton}>
-          <FontAwesome name="plus" size={24} color="#e53945" />
+          <FontAwesome name="plus" size={24} color="#1D3557" />
         </TouchableOpacity>
-      </View>
+      
 
       {/* Barra de búsqueda */}
       <TextInput
@@ -54,7 +54,7 @@ const ContactoScreen = ({ navigation }) => {
         <View style={styles.groupHeader}>
           <Text style={styles.groupTitle}>Grupos</Text>
           <TouchableOpacity onPress={() => console.log('Agregar nuevo grupo')} style={styles.addButton}>
-            <FontAwesome name="plus" size={24} color="#e53945" />
+            <FontAwesome name="plus" size={24} color="#1D3557" />
           </TouchableOpacity>
         </View>
 
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF'
   },
   header: {
     flexDirection: 'row',
@@ -84,19 +85,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   backButton: {
-    color: '#E53945',
     padding: 10,
+    position: 'absolute',
+    top: 36,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    flex: 1,
-    fontFamily: 'Inder', // Aplica la fuente Inder
-    color: '#1D3557', // Cambia el color a #1D3557
+    top: -16,
+    marginBottom: 30,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
+    color: '#1D3557', // Cambiar el color
   },
   addButton: {
     padding: 10,
+    fontFamily: 'Inder_400Regular', // Fuente personalizada
+    color: '#1D3557',
+    position: 'absolute', // Posiciona el botón de manera absoluta
+    top: 36, // Distancia desde la parte superior
+    right: 25, // Distancia desde la parte derecha
+    zIndex: 10, // Asegura que el botón esté sobre otros elementos
+},
+  addButtonGrupo:{
+    padding: 10,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
+    color: '#1D3557',
   },
   searchBar: {
     height: 40,
@@ -107,7 +124,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
     textAlign: 'center', // Centra el texto en la barra
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color del texto a #1D3557
   },
   contactList: {
@@ -118,7 +135,7 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 18,
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color a #1D3557
   },
   line: {
@@ -133,11 +150,11 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   groupTitle: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center', // Centra la palabra "Grupos"
     flex: 1, // Hace que el texto ocupe el espacio disponible para centrarlo
-    fontFamily: 'Inder', // Aplica la fuente Inder
+    fontFamily: 'Inder_400Regular', // Aplica la fuente Inder
     color: '#1D3557', // Cambia el color a #1D3557
   },
 });

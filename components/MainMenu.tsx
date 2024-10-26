@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
 import { MaterialIcons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
 
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
+    const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
+
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
     };
@@ -16,10 +18,47 @@ const HomeScreen = () => {
         return Math.floor(Math.random() * (200 - 70 + 1)) + 70;
     };
 
+    // Obtener la hora actual
+    const getCurrentTime = () => {
+        const now = new Date();
+        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+    };
+
     // Función para manejar el evento del ícono de advertencia
     const handleWarningPress = () => {
         const newGlucoseLevel = getRandomGlucoseLevel();
         setGlucoseLevel(newGlucoseLevel.toString());
+        setLastMeasurementTime(getCurrentTime()); // Guardar la hora de la última medición
+    };
+
+    const showNormalRange = () => {
+        Alert.alert("Rango Normal", "90 - 130 mg/dl");
+    };
+
+    const showPrecautionRange = () => {
+        Alert.alert("Rango Precaución", "131 - 179 mg/dl");
+    };
+
+    const showHypoglycemiaRange = () => {
+        Alert.alert("Rango Hipoglucemia", "0 - 70 mg/dl");
+    };
+
+    const showHyperglycemiaRange = () => {
+        Alert.alert("Rango Hiperglucemia", "180 - más mg/dl");
+    };
+
+    // Obtener el color basado en el nivel de glucosa
+    const getCircleColor = () => {
+        const glucose = parseInt(glucoseLevel, 10);
+        if (glucose <= 70) {
+            return '#03A9F4'; // Azul para hipoglucemia
+        } else if (glucose >= 180) {
+            return '#E53945'; // Rojo para hiperglucemia
+        } else if (glucose >= 131 && glucose <= 179) {
+            return '#FFEB3B'; // Amarillo para precaución
+        } else {
+            return '#A4C639'; // Verde para normal
+        }
     };
 
     return (
@@ -27,7 +66,7 @@ const HomeScreen = () => {
             <View style={styles.header}>
                 {/* Botón de menú para abrir el Drawer */}
                 <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
-                    <MaterialIcons name="menu" size={30} color="#e53945" /> 
+                    <MaterialIcons name="menu" size={35} color="#e53945" /> 
                 </TouchableOpacity>
             </View>
             <Text style={styles.title}>Hola Cindy</Text>
@@ -36,27 +75,39 @@ const HomeScreen = () => {
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
-            <View style={styles.circleContainer}>
+            <View style={[styles.circleContainer, { borderColor: getCircleColor() }]}>
                 <Text style={styles.circleText}>{glucoseLevel}</Text>
                 <Text style={styles.unitText}>mg/dl</Text>
             </View>
 
+            {/* Texto dinámico según la medición */}
+            {lastMeasurementTime ? (
+                <Text style={styles.reminderText}>Última medición a las {lastMeasurementTime}</Text>
+            ) : (
+                <Text style={styles.reminderText}>No Olvides Medirte</Text>
+            )}
 
-            <Text style={styles.reminderText}>No Olvides Medirte</Text>
-
-{/* Indicadores de estados */}
-             <View style={styles.statusContainer}>
+            {/* Indicadores de estados */}
+            <View style={styles.statusContainer}>
                 <View style={styles.statusButton}>
-                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#A4C639' }]}>
+                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#A4C639' }]}
+                    onPress={showNormalRange}
+                    >
                         <Text style={styles.statusText}>Normal</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#FFEB3B' }]}>
+                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#FFEB3B' }]}
+                    onPress={showPrecautionRange}
+                    >
                         <Text style={styles.statusText}>Precaución</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#03A9F4' }]}>
+                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#03A9F4' }]}
+                    onPress={showHypoglycemiaRange}
+                    >
                         <Text style={styles.statusText}>Hipoglucemia</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#E53945' }]}>
+                    <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#E53945' }]}
+                    onPress={showHyperglycemiaRange}
+                    >
                         <Text style={styles.statusText}>Hiperglucemia</Text>
                     </TouchableOpacity>
                 </View>
@@ -87,16 +138,17 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     menuButton: {
+        top:-22,
+        left: 30,
         position: 'absolute',
-        paddingRight: 20,
-        color:'#e53945',
+        color: '#E53945',
     },
     title: {
-        fontSize: 36,
+        fontSize: 30,
         fontWeight: 'bold',
         color: '#1D3557',
         fontFamily: 'Inder_400Regular',
-        
+        marginTop: -25,
     },
     avatar: {
         width: 150,
@@ -115,7 +167,6 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 75,
         borderWidth: 5,
-        borderColor: '#1D3557',
         justifyContent: 'center',
         alignItems: 'center',
         marginVertical: 20,
@@ -137,21 +188,20 @@ const styles = StyleSheet.create({
     },
     statusContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around', // Para separar los botones de estado del icono
+        justifyContent: 'space-around',
         alignItems: 'center',
         width: '100%',
         paddingHorizontal: 15,
-        marginTop: 20,
-
+        marginTop: 40,
     },
     statusButton: {
+        margin: 5,
+        justifyContent: 'center',
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 10,
-        flexDirection: 'column', // Cambiamos a columna para apilar los botones
-        alignItems: 'flex-start',
-       
-        
+        flexDirection: 'column',
+        alignItems: 'center',
     },
     statusText: {
         color: '#1d3557',
@@ -163,8 +213,9 @@ const styles = StyleSheet.create({
         marginTop: 30,
     },
     warningIcon: {
-        width: 50,
-        height: 50,
+        right: 20,
+        width: 70,
+        height: 70,
     },
 });
 

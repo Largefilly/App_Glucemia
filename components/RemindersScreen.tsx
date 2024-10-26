@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Modal, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { FontAwesome } from '@expo/vector-icons';
 
 const RemindersScreen = ({ navigation }) => {
   const [selectedReminder, setSelectedReminder] = useState('');
@@ -38,8 +39,8 @@ const RemindersScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header sin fondo, con título y botón de retroceso */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="chevron-left" size={30} color="#E53945" />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Recordatorios</Text>
       </View>
