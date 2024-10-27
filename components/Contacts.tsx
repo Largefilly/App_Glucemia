@@ -1,4 +1,3 @@
-// components/ContactoScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
@@ -31,7 +30,7 @@ const ContactoScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => console.log('Agregar nuevo contacto')} style={styles.addButton}>
           <FontAwesome name="plus" size={24} color="#1D3557" />
         </TouchableOpacity>
-      
+      </View> {/* <-- Missing closing View tag here */} 
 
       {/* Barra de búsqueda */}
       <TextInput
@@ -109,8 +108,8 @@ const styles = StyleSheet.create({
     top: 36, // Distancia desde la parte superior
     right: 25, // Distancia desde la parte derecha
     zIndex: 10, // Asegura que el botón esté sobre otros elementos
-},
-  addButtonGrupo:{
+  },
+  addButtonGrupo: {
     padding: 10,
     fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557',
