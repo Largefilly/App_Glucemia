@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import { FontAwesome } from '@expo/vector-icons';
 
 const EditProfileScreen = ({ navigation }) => {
+  // Inicializar el estado con el nombre completo
   const [name, setName] = useState('Cindy Nero');
   const [nickname, setNickname] = useState('cindy_nero');
   const [email, setEmail] = useState('youremail@domain.com');
@@ -12,15 +13,18 @@ const EditProfileScreen = ({ navigation }) => {
   const [gender, setGender] = useState('Femenino');
   const [address, setAddress] = useState('Jiron Aquiles Castro');
 
+  // Separar el primer nombre y apellido
+  const [firstName, lastName] = name.split(' ');
+
   const handleSubmit = () => {
-    console.log('Perfil actualizado:', { name, nickname, email, phone, country, gender, address });
+    console.log('Perfil actualizado:', { name: `${firstName} ${lastName}`, nickname, email, phone, country, gender, address });
   };
 
   return (
     <View style={styles.container}>
       {/* Header sin fondo, con título y botón de retroceso movidos más abajo */}
       <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
         <Text style={styles.title}>Editar Perfil</Text>
@@ -28,11 +32,18 @@ const EditProfileScreen = ({ navigation }) => {
 
       {/* Formulario centrado */}
       <ScrollView contentContainerStyle={styles.formContainer}>
-        <Text style={styles.label}>Nombre Completo</Text>
+        <Text style={styles.label}>Primer Nombre</Text>
         <TextInput
           style={styles.input}
-          value={name}
-          onChangeText={setName}
+          value={firstName}
+          onChangeText={(text) => setName(`${text} ${lastName}`)} // Actualiza solo el primer nombre
+        />
+
+        <Text style={styles.label}>Primer Apellido</Text>
+        <TextInput
+          style={styles.input}
+          value={lastName}
+          onChangeText={(text) => setName(`${firstName} ${text}`)} // Actualiza solo el apellido
         />
 
         <Text style={styles.label}>Apodo</Text>
@@ -114,22 +125,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Centra el título
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: 'transparent', // Sin fondo
-    marginTop: 40, // Mueve el encabezado más abajo
-    position: 'relative', // Permite posicionar el botón de retroceso
+    backgroundColor: 'transparent',
+    marginTop: 40,
+    position: 'relative',
   },
   backButton: {
     position: 'absolute',
-    left: 20, // Posiciona el botón de retroceso a la izquierda
+    left: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#1D3557',
-    textAlign: 'center', // Asegura que el texto esté centrado
+    textAlign: 'center',
   },
   formContainer: {
     paddingHorizontal: 20,
@@ -183,8 +194,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 20, // Espaciado horizontal para que no ocupe todo el ancho
-    marginBottom: 20, // Asegura que quede algo de espacio en la parte inferior
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   submitButtonText: {
     color: '#fff',

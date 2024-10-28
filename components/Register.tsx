@@ -1,4 +1,3 @@
-// Components/RegisterScreen.tsx
 import React, { useState } from 'react';
 import { SafeAreaView, Text, TextInput, Button, StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
@@ -8,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = ({ navigation }) => {
   const [form, setForm] = useState({
     nombre: '',
-    apellidos: '',
+    apellidos: '', // Campo de apellidos
     correo: '',
     dia: '',
     mes: '',
@@ -26,15 +25,17 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     const { nombre, apellidos, correo, dia, mes, anio, enfermedad, password } = form;
-
+  
     // Validar que todos los campos estén completos
     if (!nombre || !apellidos || !correo || !dia || !mes || !anio || !enfermedad || !password) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
       return;
     }
-
+  
     // Almacenar datos del usuario localmente
     try {
+      await AsyncStorage.setItem('userName', nombre); // Guardar el nombre del usuario
+      await AsyncStorage.setItem('userLastName', apellidos); // Guardar el apellido
       await AsyncStorage.setItem('userEmail', correo);
       await AsyncStorage.setItem('userPassword', password);
       Alert.alert('Cuenta creada con éxito');
@@ -43,6 +44,7 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert('Error', 'Ocurrió un error al registrar tu cuenta.');
     }
   };
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* Botón de regreso y título */}
@@ -52,7 +54,6 @@ const RegisterScreen = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.title}>Registro</Text>
       </View>
-      
 
       {/* Campos del formulario */}
       <TextInput
@@ -63,7 +64,7 @@ const RegisterScreen = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Apellidos *"
+        placeholder="Apellidos *" // Campo de apellidos
         value={form.apellidos}
         onChangeText={(text) => handleChange('apellidos', text)}
       />
@@ -100,8 +101,8 @@ const RegisterScreen = ({ navigation }) => {
         />
       </View>
 
-       {/* Selector de tipo de enfermedad */}
-       <View style={styles.pickerContainer}>
+      {/* Selector de tipo de enfermedad */}
+      <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.enfermedad}
           onValueChange={(itemValue) => handleChange('enfermedad', itemValue)}
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F9F9F9',
-    fontFamily: 'Inder', // Aplicar la fuente a los inputs
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los inputs
   },
   dateRow: {
     flexDirection: 'row',
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    fontFamily: 'Inder', // Aplicar la fuente a Picker
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a Picker
   },
   buttonRow: {
     flexDirection: 'row',
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     //fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'Inder', // Aplicar la fuente a los botones
+    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los botones
   },
 });
 

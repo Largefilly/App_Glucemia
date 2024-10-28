@@ -82,10 +82,13 @@ const MedicionGlucosa = () => {
   return (
     <View style={styles.glucoseContainer}>
       <Progress.Circle
+        style={{ marginTop: 10 }} 
         size={150}
-        progress={glucoseLevel / 200} // Normalizar la medición para el progreso
+        progress={glucoseLevel / 180} // Normalizar la medición para el progreso
         showsText={true}
-        formatText={() => `${glucoseLevel} mg/dl`}
+        formatText={() => (
+          <Text style={styles.glucoseTextStyle}>{`${glucoseLevel} mg/dl`}</Text>
+        )}
         color={getGlucoseColor(glucoseLevel)} // Usar el color basado en el nivel de glucosa
         unfilledColor="#1D3557"
         borderWidth={0}
@@ -136,47 +139,57 @@ const RegistroReporte = () => {
 
   return (
     <View style={styles.chartContainer}>
-      {/* Gráfico Normal y Precaución, Hiperglucemia y Hipoglucemia en fila */}
-      <View style={styles.horizontalCharts}>
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Normal y{"\n"}Precaución</Text>
-          <Progress.Circle
-            size={100}
-            progress={normalPrecautionPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(normalPrecautionPercentage * 100)}%`}
-            color="#50E055"
-            unfilledColor="#F0F05F"
-            borderWidth={0}
-          />
-        </View>
+  {/* Gráfico Normal y Precaución, Hiperglucemia y Hipoglucemia en fila */}
+  <View style={styles.horizontalCharts}>
+    
+    {/* Normal y Precaución */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Normal y{"\n"}Precaución</Text>
+      <Progress.Circle
+        size={100}
+        progress={normalPrecautionPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(normalPrecautionPercentage * 100)}%`}
+        color="#50E055"
+        unfilledColor="#F0F05F"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
 
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Hiperglucemia{"\n"}</Text>
-          <Progress.Circle
-            size={100}
-            progress={hyperglycemiaPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(hyperglycemiaPercentage * 100)}%`}
-            color="#E53945"
-            unfilledColor="#1D3557"
-            borderWidth={0}
-          />
-        </View>
+    {/* Hiperglucemia */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Hiperglucemia{"\n"}</Text>
+      <Progress.Circle
+        size={100}
+        progress={hyperglycemiaPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(hyperglycemiaPercentage * 100)}%`}
+        color="#E53945"
+        unfilledColor="#1D3557"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
 
-        <View style={styles.chartItem}>
-          <Text style={styles.chartTitle}>Hipoglucemia{"\n"}</Text>
-          <Progress.Circle
-            size={100}
-            progress={hypoglycemiaPercentage}
-            showsText={true}
-            formatText={() => `${Math.round(hypoglycemiaPercentage * 100)}%`}
-            color="#6FB5E1"
-            unfilledColor="#1D3557"
-            borderWidth={0}
-          />
-        </View>
-      </View>
+    {/* Hipoglucemia */}
+    <View style={styles.chartItem}>
+      <Text style={styles.chartTitle}>Hipoglucemia{"\n"}</Text>
+      <Progress.Circle
+        size={100}
+        progress={hypoglycemiaPercentage}
+        showsText={true}
+        formatText={() => `${Math.round(hypoglycemiaPercentage * 100)}%`}
+        color="#6FB5E1"
+        unfilledColor="#1D3557"
+        borderWidth={0}
+        thickness={8} // Grosor del círculo aumentado
+        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
+      />
+    </View>
+  </View>
 
       {/* Análisis del Reporte */}
       <Text style={styles.analysisTitle}>Análisis del Reporte</Text>
@@ -225,10 +238,10 @@ const MeasurementCard = ({ title }) => {
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
       <View style={styles.cardChart}>
-        <Text style={{ color: '#50E055', fontFamily: 'Inder'}}>{normal}%</Text>
-        <Text style={{ color: '#F0F05F', fontFamily: 'Inder'}}>{precaucion}%</Text>
-        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder'}}>{hipo}%</Text>
-        <Text style={{ color: '#E53945', fontFamily: 'Inder'}}>{hiper}%</Text>
+        <Text style={{ color: '#50E055', fontFamily: 'Inder_400Regular'}}>{normal}%</Text>
+        <Text style={{ color: '#F0F05F', fontFamily: 'Inder_400Regular'}}>{precaucion}%</Text>
+        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder_400Regular'}}>{hipo}%</Text>
+        <Text style={{ color: '#E53945', fontFamily: 'Inder_400Regular'}}>{hiper}%</Text>
       </View>
     </View>
   );
@@ -236,8 +249,13 @@ const MeasurementCard = ({ title }) => {
 
 // Estilos
 const styles = StyleSheet.create({
+  glucoseTextStyle: {
+    fontSize: 24, // Ajusta el tamaño de la fuente
+    color: '#1D3557', // Cambia el color a lo que prefieras
+    fontWeight: 'bold', // Puedes hacerla negrita si lo deseas
+  },  
   container: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
@@ -249,68 +267,67 @@ const styles = StyleSheet.create({
     top: 33,
     left: 25,
     zIndex: 3,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    top: -16,
+    marginTop: -17,
     marginBottom: 30,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   tabNavigation: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 20,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButton: {
     padding: 10,
     marginHorizontal: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonSelected: {
     borderBottomColor: '#000',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1D3557',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   glucoseContainer: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     alignItems: 'center',
     marginVertical: 10,
   },
   lastMeasurementText: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     top: 10,
     marginTop: 5,
     color: '#1D3557',
   },
   sectionTitle: {
-    fontFamily: 'Inder',
-    top: 10,
+    fontFamily: 'Inder_400Regular',
     fontSize: 18,
-    marginTop: 20,
+    marginTop: 70,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#1D3557',
   },
   previousMeasurements: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 20,
   },
   card: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     margin: 5,
     width: 80,
     height: 120,
@@ -320,7 +337,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cardTitle: {
-    fontFamily: 'Inder',
+    fontFamily: 'Inder_400Regular',
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1D3557',
@@ -347,7 +364,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
     textAlign: 'center',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   analysisTitle: {
@@ -355,7 +372,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   histogramContainer: {
@@ -378,7 +395,7 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 12,
     textAlign: 'center',
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   contactsTitle: {
@@ -386,7 +403,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   line: {
@@ -409,12 +426,12 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 16,
     flex: 1,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
   contactDate: {
     fontSize: 12,
-    fontFamily: 'Inder', // Añadir la fuente
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color
   },
 });

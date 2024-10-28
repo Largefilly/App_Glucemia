@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Font from 'expo-font';
-//import { StatusBar, SafeAreaView } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importamos el Drawer Navigator
 
@@ -14,11 +13,9 @@ import { StatusBar, SafeAreaView, ActivityIndicator } from 'react-native';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/Register';
 import HomeScreen from './components/MainMenu';
-import ReporteScreen from './components/Reportes';
-import ContactoScreen from './components/Contactos';
+import ReporteScreen from './components/Reports';
+import ContactoScreen from './components/Contacts';
 import AddContactScreen from './components/AddContactScreen'; // Asegúrate de que esta pantalla esté importada
-
-// Pantallas Añadidas
 import ProfileScreen from './components/ProfileScreen';
 
 // Pantallas de Configuración (que no aparecerán en el Drawer)
@@ -50,20 +47,17 @@ type RootStackParamList = {
   PrivacyPolicy: undefined;
 };
 
-const loadFonts = async () => {
-  await Font.loadAsync({
-    'Inder': require('./assets/fonts/Inder-Regular.ttf'),
-  });
-};
 
 const App: React.FC = () => {
+  // Cargar la fuente usando useFonts
   const [fontsLoaded] = useFonts({
     Inder_400Regular,
   });
 
-  useEffect(() => {
-    loadFonts();
-  }, []);
+  // Si las fuentes no están cargadas, mostrar una pantalla de carga
+  if (!fontsLoaded) {
+    return <ActivityIndicator size="large" color="#1D3557" />;
+  }
 
   if (!fontsLoaded) {
     return <ActivityIndicator />;
