@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as ImagePicker from 'expo-image-picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -22,50 +21,36 @@ interface Props {
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png'));
 
+  // Eliminar el header al cargar la pantalla
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
-  const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setProfileImage({ uri: result.assets[0].uri });
-    }
-  };
-
   return (
-      <ScrollView style={styles.container}>
-        <View style={styles.headerBackground}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <FontAwesome name="arrow-left" size={24} color="#e53945" />
+    <ScrollView style={styles.container}>
+      {/* Fondo curvado en la parte superior */}
+      <View style={styles.headerBackground}>
+        {/* Botón de retroceso */}
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Imagen de perfil, nombre y correo */}
+      <View style={styles.profileContainer}>
+        <View style={styles.profileImageWrapper}>
+          <Image
+            source={require('../assets/FotoPerfil.png')} // Ruta correcta de la imagen local
+            style={styles.profileImage}
+          />
+          <TouchableOpacity style={styles.editIcon} onPress={() => navigation.navigate('EditProfile')}>
+            <Icon name="pencil" size={20} color="#000" />
           </TouchableOpacity>
         </View>
-
-        <View style={styles.profileContainer}>
-          <View style={styles.profileImageWrapper}>
-            <Image source={profileImage} style={styles.profileImage} />
-            <TouchableOpacity style={styles.editIcon} onPress={pickImage}>
-              <Icon name="camera" size={20} color="#000" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.profileName}>Cindy Nero</Text>
-          <Text style={styles.profileEmail}>youremail@domain.com</Text>
-        </View>
+        <Text style={styles.profileName}>Cindy Nero</Text>
+        <Text style={styles.profileEmail}>youremail@domain.com</Text>
+      </View>
 
       {/* Secciones de Configuración */}
       <View style={styles.section}>
