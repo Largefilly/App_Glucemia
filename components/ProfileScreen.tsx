@@ -6,7 +6,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 type RootStackParamList = {
   Profile: undefined;
   EditProfile: undefined;
@@ -25,134 +24,179 @@ interface Props {
 
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png'));
+  const [userName, setUserName] = useState('');
+  const [userLastName, setUserLastName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
+    loadUserData();
   }, [navigation]);
+
+  const loadUserData = async () => {
+    try {
+      
+      const name = await AsyncStorage.getItem('userName');
+      const lastName = await AsyncStorage.getItem('userLastName');
+      const email = await AsyncStorage.getItem('userEmail');
+
+      if (name) {
+        const firstName = name.split(' ')[0];
+        setUserName(firstName);
+      }
+
+      if (lastName) {
+        const firstlastName = lastName.split(' ')[0];
+        setUserLastName(firstlastName);
+      }
+
+      if (email) setUserEmail(email);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería.");
-      return;
+        Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería.");
+        return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setProfileImage({ uri });
-      await AsyncStorage.setItem('profileImage', uri); // Guardar la URI en AsyncStorage
+        const uri = result.assets[0].uri;
+        setProfileImage({ uri }); // Establece el estado local
+        await AsyncStorage.setItem('profileImage', uri); // Guarda la imagen en AsyncStorage
+        console.log("Imagen guardada en AsyncStorage:", uri);
     }
-  };
+};
+
+// También, al cargar el componente, recupera la imagen guardada
+useEffect(() => {
+    const loadProfileData = async () => {
+        try {
+            const savedImage = await AsyncStorage.getItem('profileImage');
+            if (savedImage) {
+                setProfileImage({ uri: savedImage }); // Establece el estado con la imagen recuperada
+            }
+        } catch (error) {
+            console.log('Error al cargar la imagen:', error);
+        }
+    };
+
+    loadProfileData();
+}, []);
+
 
   return (
-      <ScrollView style={styles.container}>
-        <View style={styles.headerBackground}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <FontAwesome name="arrow-left" size={24} color="#e53945" />
+    <ScrollView style={styles.container}>
+      <View style={styles.headerBackground}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="#e53945" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.profileContainer}>
+        <View style={styles.profileImageWrapper}>
+          <Image source={profileImage} style={styles.profileImage} />
+          <TouchableOpacity style={styles.editIcon} onPress={pickImage}>
+            <Icon name="camera" size={20} color="#000" />
           </TouchableOpacity>
         </View>
+        <Text style={styles.profileName}>{userName} {userLastName}</Text>
+        <Text style={styles.profileEmail}>{userEmail}</Text>
+      </View>
 
-        <View style={styles.profileContainer}>
-          <View style={styles.profileImageWrapper}>
-            <Image source={profileImage} style={styles.profileImage} />
-            <TouchableOpacity style={styles.editIcon} onPress={pickImage}>
-              <Icon name="camera" size={20} color="#000" />
-            </TouchableOpacity>
+      {/* Secciones de Configuración */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.sectionItemNoBackground}>
+          <View style={styles.sectionIconText}>
+            <Icon name="cog" size={24} color="#a8dadb" />
+            <Text style={styles.sectionText}>Configuración</Text>
           </View>
-          <Text style={styles.profileName}>Cindy Nero</Text>
-          <Text style={styles.profileEmail}>youremail@domain.com</Text>
-        </View>
+        </TouchableOpacity>
 
-        {/* Secciones de Configuración */}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.sectionItemNoBackground}>
+        <View style={styles.groupedSection}>
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('EditProfile')}
+          >
             <View style={styles.sectionIconText}>
-              <Icon name="cog" size={24} color="#a8dadb" />
-              <Text style={styles.sectionText}>Configuración</Text>
+              <Icon name="account" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Editar Información de Perfil</Text>
             </View>
           </TouchableOpacity>
 
-          <View style={styles.groupedSection}>
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('EditProfile')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="account" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Editar Información de Perfil</Text>
-              </View>
-            </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('Reminders')}
+          >
+            <View style={styles.sectionIconText}>
+              <Icon name="bell" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Recordatorios</Text>
+            </View>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('Reminders')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="bell" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Recordatorios</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('Language')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="earth" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Idioma</Text>
-              </View>
-              <Text style={styles.sectionRightText}>Español</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.separator} />
-
-          <View style={styles.groupedSection}>
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('Theme')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="theme-light-dark" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Tema</Text>
-              </View>
-              <Text style={styles.sectionRightText}>Light mode</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.separator} />
-
-          <View style={styles.groupedSection}>
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('Support')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="headset" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Feedback y Soporte</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.sectionItem}
-                onPress={() => navigation.navigate('PrivacyPolicy')}
-            >
-              <View style={styles.sectionIconText}>
-                <Icon name="file-document-outline" size={24} color="#a8dadb" />
-                <Text style={styles.sectionText}>Política de Privacidad</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('Language')}
+          >
+            <View style={styles.sectionIconText}>
+              <Icon name="earth" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Idioma</Text>
+            </View>
+            <Text style={styles.sectionRightText}>Español</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+
+        <View style={styles.separator} />
+
+        <View style={styles.groupedSection}>
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('Theme')}
+          >
+            <View style={styles.sectionIconText}>
+              <Icon name="theme-light-dark" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Tema</Text>
+            </View>
+            <Text style={styles.sectionRightText}>Light mode</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.separator} />
+
+        <View style={styles.groupedSection}>
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('Support')}
+          >
+            <View style={styles.sectionIconText}>
+              <Icon name="headset" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Feedback y Soporte</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+              style={styles.sectionItem}
+              onPress={() => navigation.navigate('PrivacyPolicy')}
+          >
+            <View style={styles.sectionIconText}>
+              <Icon name="file-document-outline" size={24} color="#a8dadb" />
+              <Text style={styles.sectionText}>Política de Privacidad</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -163,7 +207,7 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: '100%',
-    height: 200, // Reducido el fondo a 200 (de 250)
+    height: 180, // Reducido el fondo a 200 (de 250)
     backgroundColor: '#a8dadb', // Verde Agua
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
@@ -172,11 +216,15 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   backButton: {
-    marginTop: 50,
-    marginLeft: 20,
+    padding: 10,
+    position: 'absolute',
+    top: 33,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   profileContainer: {
-    marginTop: 120, // Movido más arriba a 120 para ajustarse a la nueva altura del fondo
+    marginTop: 100, // Movido más arriba a 120 para ajustarse a la nueva altura del fondo
     alignItems: 'center',
   },
   profileImageWrapper: {

@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native'; // Importamos useNavig
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
 
-
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
     const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
@@ -15,7 +14,6 @@ const HomeScreen = () => {
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
 
     useEffect(() => {
-        // Cargar el nombre del usuario y la imagen de perfil desde AsyncStorage
         const loadProfileData = async () => {
             try {
                 const name = await AsyncStorage.getItem('userName');
@@ -33,8 +31,10 @@ const HomeScreen = () => {
             }
         };
 
-        loadProfileData();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', loadProfileData); // Cargar datos al volver a la pantalla
+
+        return unsubscribe; // Limpiar el listener
+    }, [navigation]);      
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
@@ -117,7 +117,8 @@ const HomeScreen = () => {
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} />
+            {/* Mostrar la imagen de perfil */}
+            <Image source={profileImage} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
@@ -197,9 +198,11 @@ const styles = StyleSheet.create({
         marginTop: -25,
     },
     avatar: {
+        borderWidth: 3, // Ancho del borde
+        borderColor: '#1D3557', // Color del borde
         width: 137,
         height: 137,
-        borderRadius: 50,
+        borderRadius: 70,
         marginTop: 20,
         marginBottom: 20,
     },
@@ -242,7 +245,7 @@ const styles = StyleSheet.create({
     },
     statusButton: {
         marginLeft:5,
-        width:124,
+        width:130,
         margin: 5,
         justifyContent: 'center',
         paddingVertical: 10,
