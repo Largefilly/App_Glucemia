@@ -205,9 +205,11 @@ const styles = StyleSheet.create({
         marginTop: -25,
     },
     avatar: {
+        borderColor: '#1D3557',
+        borderWidth: 5,
         width: 137,
         height: 137,
-        borderRadius: 50,
+        borderRadius: 70,
         marginTop: 20,
         marginBottom: 20,
     },
