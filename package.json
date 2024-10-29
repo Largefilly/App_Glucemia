@@ -32,7 +32,8 @@
     "react-native-screens": "3.31.1",
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "yarn": "^1.22.22"
+    "yarn": "^1.22.22",
+    "expo-image-picker": "~15.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

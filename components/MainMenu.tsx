@@ -5,28 +5,35 @@ import { useNavigation } from '@react-navigation/native'; // Importamos useNavig
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
 
+
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
     const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
     const [userName, setUserName] = useState(''); // Estado para almacenar el nombre del usuario
+    const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
 
     useEffect(() => {
-        // Cargar el nombre del usuario desde AsyncStorage
-        const loadUserName = async () => {
+        // Cargar el nombre del usuario y la imagen de perfil desde AsyncStorage
+        const loadProfileData = async () => {
             try {
                 const name = await AsyncStorage.getItem('userName');
                 if (name) {
-                    const firstName = name.split(' ')[0]; // Toma solo el primer nombre
+                    const firstName = name.split(' ')[0];
                     setUserName(firstName);
                 }
+
+                const savedImage = await AsyncStorage.getItem('profileImage');
+                if (savedImage) {
+                    setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                }
             } catch (error) {
-                console.log('Error cargando el nombre del usuario', error);
+                console.log('Error cargando la imagen o nombre del usuario', error);
             }
         };
 
-        loadUserName(); // Llamar a la función al cargar la pantalla
+        loadProfileData();
     }, []);
 
     const handleMenuPress = () => {
@@ -94,7 +101,7 @@ const HomeScreen = () => {
             <View style={styles.header}>
                 {/* Botón de menú para abrir el Drawer */}
                 <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
-                    <MaterialIcons name="menu" size={35} color="#e53945" /> 
+                    <MaterialIcons name="menu" size={35} color="#e53945" />
                 </TouchableOpacity>
                  {/* Icono de notificaciones */}
                  <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
@@ -110,7 +117,7 @@ const HomeScreen = () => {
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} /> 
+            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
