@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';  // Import
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
+
 
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
@@ -13,32 +15,37 @@ const HomeScreen = () => {
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
 
+    // Importante: Usar useIsFocused para saber si la pantalla está en foco
+    const isFocused = useIsFocused();
+
+    // useEffect modificado que se ejecuta cuando la pantalla gana el foco
     useEffect(() => {
-        const loadProfileData = async () => {
-            try {
-                const name = await AsyncStorage.getItem('userName');
-                if (name) {
-                    const firstName = name.split(' ')[0];
-                    setUserName(firstName);
+        if (isFocused) {
+            const loadProfileData = async () => {
+                try {
+                    const name = await AsyncStorage.getItem('userName');
+                    if (name) {
+                        const firstName = name.split(' ')[0];
+                        setUserName(firstName);
+                    }
+
+                    const savedImage = await AsyncStorage.getItem('profileImage');
+                    if (savedImage) {
+                        setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                    }
+                } catch (error) {
+                    console.log('Error cargando la imagen o nombre del usuario', error);
                 }
+            };
 
-                const savedImage = await AsyncStorage.getItem('profileImage');
-                if (savedImage) {
-                    setProfileImage({ uri: savedImage }); // Usar la imagen guardada
-                }
-            } catch (error) {
-                console.log('Error cargando la imagen o nombre del usuario', error);
-            }
-        };
-
-        const unsubscribe = navigation.addListener('focus', loadProfileData); // Cargar datos al volver a la pantalla
-
-        return unsubscribe; // Limpiar el listener
-    }, [navigation]);      
+            loadProfileData();
+        }
+    }, [isFocused]); // El efecto depende de isFocused
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
     };
+
 
     // Función para generar un valor aleatorio entre 70 y 200
     const getRandomGlucoseLevel = () => {
@@ -95,7 +102,6 @@ const HomeScreen = () => {
             return '#1D3557';
         }
     };
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -103,8 +109,8 @@ const HomeScreen = () => {
                 <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
                     <MaterialIcons name="menu" size={35} color="#e53945" />
                 </TouchableOpacity>
-                 {/* Icono de notificaciones */}
-                 <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
+                {/* Icono de notificaciones */}
+                <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
                     <Ionicons name="notifications-outline" size={35} color="#e53945" />
                     {notificationCount > 0 && (
                         <View style={styles.notificationBadge}>
@@ -113,11 +119,11 @@ const HomeScreen = () => {
                     )}
                 </TouchableOpacity>
             </View>
-            
+
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            {/* Mostrar la imagen de perfil */}
+            {/* Aquí mostramos la imagen de perfil actualizada */}
             <Image source={profileImage} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
@@ -169,6 +175,7 @@ const HomeScreen = () => {
     );
 }
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -198,11 +205,9 @@ const styles = StyleSheet.create({
         marginTop: -25,
     },
     avatar: {
-        borderWidth: 3, // Ancho del borde
-        borderColor: '#1D3557', // Color del borde
         width: 137,
         height: 137,
-        borderRadius: 70,
+        borderRadius: 50,
         marginTop: 20,
         marginBottom: 20,
     },
@@ -245,7 +250,7 @@ const styles = StyleSheet.create({
     },
     statusButton: {
         marginLeft:5,
-        width:130,
+        width:124,
         margin: 5,
         justifyContent: 'center',
         paddingVertical: 10,
