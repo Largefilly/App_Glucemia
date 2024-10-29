@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';  // Import
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const HomeScreen = () => {
@@ -13,28 +14,30 @@ const HomeScreen = () => {
     const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
+    const isFocused = useIsFocused();
 
     useEffect(() => {
-        // Cargar el nombre del usuario y la imagen de perfil desde AsyncStorage
-        const loadProfileData = async () => {
-            try {
-                const name = await AsyncStorage.getItem('userName');
-                if (name) {
-                    const firstName = name.split(' ')[0];
-                    setUserName(firstName);
-                }
+        if (isFocused) {
+            const loadProfileData = async () => {
+                try {
+                    const name = await AsyncStorage.getItem('userName');
+                    if (name) {
+                        const firstName = name.split(' ')[0];
+                        setUserName(firstName);
+                    }
 
-                const savedImage = await AsyncStorage.getItem('profileImage');
-                if (savedImage) {
-                    setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                    const savedImage = await AsyncStorage.getItem('profileImage');
+                    if (savedImage) {
+                        setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                    }
+                } catch (error) {
+                    console.log('Error cargando la imagen o nombre del usuario', error);
                 }
-            } catch (error) {
-                console.log('Error cargando la imagen o nombre del usuario', error);
-            }
-        };
+            };
 
-        loadProfileData();
-    }, []);
+            loadProfileData();
+        }
+    }, [isFocused]); // El efecto depende de isFocused
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
@@ -103,8 +106,8 @@ const HomeScreen = () => {
                 <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
                     <MaterialIcons name="menu" size={35} color="#e53945" />
                 </TouchableOpacity>
-                 {/* Icono de notificaciones */}
-                 <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
+                {/* Icono de notificaciones */}
+                <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
                     <Ionicons name="notifications-outline" size={35} color="#e53945" />
                     {notificationCount > 0 && (
                         <View style={styles.notificationBadge}>
@@ -113,11 +116,12 @@ const HomeScreen = () => {
                     )}
                 </TouchableOpacity>
             </View>
-            
+
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} />
+            {/* Aquí mostramos la imagen de perfil actualizada */}
+            <Image source={profileImage} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
