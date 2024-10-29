@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "App_Glucemia",
-    "slug": "App_Glucemia",
+    "name": "Glucoller",
+    "slug": "glucoller",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,17 +16,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logoGlucoller.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anruzulo.App_Glucemia"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ]
-
-    
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7a6d8084-3127-4b7e-a662-b56c1664c8fd"
+      }
+    }
   }
 }
