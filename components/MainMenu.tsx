@@ -2,30 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';  // Importar AsyncStorage
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
-import { MaterialIcons } from '@expo/vector-icons'; // Importamos el ícono del menú
+import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
+
 
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
     const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
     const [userName, setUserName] = useState(''); // Estado para almacenar el nombre del usuario
+    const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
+    const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
 
     useEffect(() => {
-        // Cargar el nombre del usuario desde AsyncStorage
-        const loadUserName = async () => {
+        // Cargar el nombre del usuario y la imagen de perfil desde AsyncStorage
+        const loadProfileData = async () => {
             try {
                 const name = await AsyncStorage.getItem('userName');
                 if (name) {
-                    const firstName = name.split(' ')[0]; // Toma solo el primer nombre
+                    const firstName = name.split(' ')[0];
                     setUserName(firstName);
                 }
+
+                const savedImage = await AsyncStorage.getItem('profileImage');
+                if (savedImage) {
+                    setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                }
             } catch (error) {
-                console.log('Error cargando el nombre del usuario', error);
+                console.log('Error cargando la imagen o nombre del usuario', error);
             }
         };
 
-        loadUserName(); // Llamar a la función al cargar la pantalla
+        loadProfileData();
     }, []);
 
     const handleMenuPress = () => {
@@ -48,6 +56,12 @@ const HomeScreen = () => {
         const newGlucoseLevel = getRandomGlucoseLevel();
         setGlucoseLevel(newGlucoseLevel.toString());
         setLastMeasurementTime(getCurrentTime()); // Guardar la hora de la última medición
+        setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de notificaciones
+    };
+
+    const handleNotificationPress = () => {
+        navigation.navigate('NotificationScreen'); // Navegar a la pantalla de notificaciones
+        setNotificationCount(0); // Resetear el contador al entrar en la pantalla de notificaciones
     };
 
     const showNormalRange = () => {
@@ -87,13 +101,23 @@ const HomeScreen = () => {
             <View style={styles.header}>
                 {/* Botón de menú para abrir el Drawer */}
                 <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
-                    <MaterialIcons name="menu" size={35} color="#e53945" /> 
+                    <MaterialIcons name="menu" size={35} color="#e53945" />
+                </TouchableOpacity>
+                 {/* Icono de notificaciones */}
+                 <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
+                    <Ionicons name="notifications-outline" size={35} color="#e53945" />
+                    {notificationCount > 0 && (
+                        <View style={styles.notificationBadge}>
+                            <Text style={styles.notificationText}>{notificationCount}</Text>
+                        </View>
+                    )}
                 </TouchableOpacity>
             </View>
+            
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} /> 
+            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
@@ -241,6 +265,27 @@ const styles = StyleSheet.create({
         
         width: 80,
         height: 80,
+    },
+    notificationButton: {
+        position: 'absolute',
+        right: 30,
+        top: -22,
+    },
+    notificationBadge: {
+        position: 'absolute',
+        right: -6,
+        top: -6,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    notificationText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });
 
