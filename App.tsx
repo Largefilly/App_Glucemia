@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useState, createContext } from 'react';import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Font from 'expo-font';
 
@@ -102,41 +101,41 @@ const App: React.FC = () => {
         },
       }}
     >
-      <Drawer.Screen 
-        name="Menu Principal" 
-        component={HomeScreen} 
+      <Drawer.Screen
+        name="Menu Principal"
+        component={HomeScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <FontAwesome name="home" size={size} color={color} />
           ),
-        }} 
+        }}
       />
-      <Drawer.Screen 
-        name="Reportes" 
-        component={ReporteScreen} 
+      <Drawer.Screen
+        name="Reportes"
+        component={ReporteScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <FontAwesome name="bar-chart" size={size} color={color} />
           ),
-        }} 
+        }}
       />
-      <Drawer.Screen 
-        name="Contactos" 
-        component={ContactoScreen} 
+      <Drawer.Screen
+        name="Contactos"
+        component={ContactoScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <FontAwesome name="address-book" size={size} color={color} />
           ),
-        }} 
+        }}
       />
-      <Drawer.Screen 
-        name="Perfil de Usuario" 
-        component={ProfileScreen} 
+      <Drawer.Screen
+        name="Perfil de Usuario"
+        component={ProfileScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <FontAwesome name="user" size={size} color={color} />
           ),
-        }} 
+        }}
       />
     </Drawer.Navigator>
   );
