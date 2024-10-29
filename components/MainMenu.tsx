@@ -14,8 +14,11 @@ const HomeScreen = () => {
     const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
+
+    // Importante: Usar useIsFocused para saber si la pantalla está en foco
     const isFocused = useIsFocused();
 
+    // useEffect modificado que se ejecuta cuando la pantalla gana el foco
     useEffect(() => {
         if (isFocused) {
             const loadProfileData = async () => {
@@ -42,6 +45,7 @@ const HomeScreen = () => {
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
     };
+
 
     // Función para generar un valor aleatorio entre 70 y 200
     const getRandomGlucoseLevel = () => {
@@ -98,7 +102,6 @@ const HomeScreen = () => {
             return '#1D3557';
         }
     };
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -171,6 +174,7 @@ const HomeScreen = () => {
         </SafeAreaView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
