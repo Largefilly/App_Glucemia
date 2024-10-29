@@ -42,19 +42,6 @@ const HomeScreen = () => {
         }
     }, [isFocused]); // El efecto depende de isFocused
 
-    useEffect(() => {
-        // Simulación de algunas notificaciones iniciales
-        const initialNotifications = [
-            { id: '1', title: 'Nueva Actualización', description: 'Hemos actualizado la aplicación.', read: false },
-            { id: '2', title: 'Recordatorio', description: 'Es hora de medir tu glucosa.', read: false },
-            { id: '3', title: 'Felicidades', description: 'Has alcanzado tu objetivo de la semana.', read: false },
-            { id: '4', title: 'Nueva Función', description: 'Chequea la nueva función en la app.', read: false },
-            { id: '5', title: 'Actualización de Privacidad', description: 'Revisa nuestros nuevos términos.', read: false },
-            { id: '6', title: 'Mensaje de Soporte', description: 'Tu solicitud ha sido recibida.', read: false },
-        ];
-        setNotifications(initialNotifications);
-        setNotificationCount(initialNotifications.length);
-    }, []);
 
     const handleNotificationPress = () => {
         setModalVisible(true);
@@ -194,49 +181,52 @@ const HomeScreen = () => {
                 <Text style={styles.unitText}>mg/dl</Text>
             </View>
             <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Notificaciones</Text>
-                        <FlatList
-                            data={notifications.slice(0, 5)}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => (
-                                <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
-                                    <Text style={styles.notificationTitle}>{item.title}</Text>
-                                    <Text style={styles.notificationDescription}>{item.description}</Text>
-                                    <View style={styles.notificationActions}>
-                                        <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
-                                            <Text style={styles.readButton}>Leer</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
-                                            <Text style={styles.deleteButton}>Borrar</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            )}
-                        />
-                        <TouchableOpacity
-                            style={styles.viewAllButton}
-                            onPress={handleViewAllNotifications}
-                        >
-                            <Text style={styles.viewAllButtonText}>Ver Todas</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisible(!modalVisible)}
-                        >
-                            <Text style={styles.closeButtonText}>Cerrar</Text>
-                        </TouchableOpacity>
+    animationType="slide"
+    transparent={true}
+    visible={modalVisible}
+    onRequestClose={() => {
+        setModalVisible(!modalVisible);
+    }}
+>
+    <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Notificaciones</Text>
+            <FlatList
+                data={notifications} // Muestra todas las notificaciones
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
+                        <Text style={styles.notificationTitle}>{item.title}</Text>
+                        <Text style={styles.notificationDescription}>{item.description}</Text>
+                        <View style={styles.notificationActions}>
+                            <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
+                                <Text style={styles.readButton}>Leer</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
+                                <Text style={styles.deleteButton}>Borrar</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </Modal>
+                )}
+                showsVerticalScrollIndicator={true} // Muestra el indicador de desplazamiento vertical
+                style={{ maxHeight: 400 }} // Ajusta la altura máxima del área de notificaciones
+            />
+            <TouchableOpacity
+                style={styles.viewAllButton}
+                onPress={handleViewAllNotifications}
+            >
+                <Text style={styles.viewAllButtonText}>Ver Todas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(!modalVisible)}
+            >
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+</Modal>
+
 
 
 
@@ -326,11 +316,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '80%',
+        width: '90%',
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 20,
         alignItems: 'center',
+        maxHeight: '70%', // Limita la altura máxima del modal para que haya espacio para el scroll
     },
     modalTitle: {
         fontSize: 20,
