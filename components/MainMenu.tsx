@@ -64,6 +64,9 @@ const HomeScreen = () => {
         const updatedNotifications = notifications.filter(notification => notification.id !== id);
         setNotifications(updatedNotifications);
         setNotificationCount(updatedNotifications.length);
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications)).catch((error) => {
+            console.error('Error al eliminar la notificación:', error);
+        });
     };
 
     const handleNotificationRead = (id) => {
@@ -74,7 +77,11 @@ const HomeScreen = () => {
             return notification;
         });
         setNotifications(updatedNotifications);
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications)).catch((error) => {
+            console.error('Error al actualizar la notificación:', error);
+        });
     };
+
 
     const handleViewAllNotifications = () => {
         setModalVisible(false);
@@ -98,14 +105,30 @@ const HomeScreen = () => {
     };
 
     // Función para manejar el evento del ícono de advertencia
-    const handleWarningPress = () => {
+    const handleWarningPress = async () => {
         const newGlucoseLevel = getRandomGlucoseLevel();
         setGlucoseLevel(newGlucoseLevel.toString());
-        setLastMeasurementTime(getCurrentTime()); // Guardar la hora de la última medición
-        setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de notificaciones
+        setLastMeasurementTime(getCurrentTime());
+
+        const newNotification = {
+            id: `${Date.now()}`,
+            title: 'Nueva Medición Registrada',
+            description: `Tu nivel de glucosa ha sido registrado: ${newGlucoseLevel} mg/dl`,
+            read: false,
+        };
+
+        try {
+            const storedNotifications = await AsyncStorage.getItem('notifications');
+            const currentNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
+            const updatedNotifications = [newNotification, ...currentNotifications];
+
+            setNotifications(updatedNotifications);
+            setNotificationCount(updatedNotifications.length);
+            await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        } catch (error) {
+            console.error('Error al guardar la notificación:', error);
+        }
     };
-
-
 
     const showNormalRange = () => {
         Alert.alert("Rango Normal", "90 - 130 mg/dl");
@@ -171,50 +194,49 @@ const HomeScreen = () => {
                 <Text style={styles.unitText}>mg/dl</Text>
             </View>
             <Modal
-    animationType="slide"
-    transparent={true}
-    visible={modalVisible}
-    onRequestClose={() => {
-        setModalVisible(!modalVisible);
-    }}
->
-    {/* Mover el contenido del modal aquí */}
-    <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Notificaciones</Text>
-            <FlatList
-                data={notifications.slice(0, 5)}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
-                        <Text style={styles.notificationTitle}>{item.title}</Text>
-                        <Text style={styles.notificationDescription}>{item.description}</Text>
-                        <View style={styles.notificationActions}>
-                            <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
-                                <Text style={styles.readButton}>Leer</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
-                                <Text style={styles.deleteButton}>Borrar</Text>
-                            </TouchableOpacity>
-                        </View>
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Notificaciones</Text>
+                        <FlatList
+                            data={notifications.slice(0, 5)}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
+                                    <Text style={styles.notificationTitle}>{item.title}</Text>
+                                    <Text style={styles.notificationDescription}>{item.description}</Text>
+                                    <View style={styles.notificationActions}>
+                                        <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
+                                            <Text style={styles.readButton}>Leer</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
+                                            <Text style={styles.deleteButton}>Borrar</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )}
+                        />
+                        <TouchableOpacity
+                            style={styles.viewAllButton}
+                            onPress={handleViewAllNotifications}
+                        >
+                            <Text style={styles.viewAllButtonText}>Ver Todas</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setModalVisible(!modalVisible)}
+                        >
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
                     </View>
-                )}
-            />
-            <TouchableOpacity
-                style={styles.viewAllButton}
-                onPress={handleViewAllNotifications}
-            >
-                <Text style={styles.viewAllButtonText}>Ver Todas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(!modalVisible)}
-            >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-</Modal>
+                </View>
+            </Modal>
 
 
 
