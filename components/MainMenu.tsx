@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     },
     statusButton: {
         marginLeft:5,
-        width:124,
+        width:130,
         margin: 5,
         justifyContent: 'center',
         paddingVertical: 10,
