@@ -57,13 +57,18 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   backButton: {
+    padding: 10,
     position: 'absolute',
-    left: 20, 
+    top: -8,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    top: -12,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#1D3557', 
+    color: '#1D3557',
     textAlign: 'center',
   },
   themeContainer: {

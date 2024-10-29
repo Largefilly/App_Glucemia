@@ -22,7 +22,7 @@
       "package": "com.anruzulo.App_Glucemia"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logoGlucoller.png"
     },
     "plugins": [
       "expo-font"

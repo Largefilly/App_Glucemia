@@ -89,14 +89,19 @@ const styles = StyleSheet.create({
     position: 'relative', // Permite posicionar el botón de retroceso
   },
   backButton: {
+    padding: 10,
     position: 'absolute',
-    left: 20, // Posiciona el botón de retroceso a la izquierda
+    top: -8,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    top: -12,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#1D3557', // Azul Oscuro
-    textAlign: 'center', // Asegura que el texto esté centrado
+    color: '#1D3557',
+    textAlign: 'center',
   },
   languageContainer: {
     padding: 20,
