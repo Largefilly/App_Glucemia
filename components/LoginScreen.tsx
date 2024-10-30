@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
           <Text style={styles.title}>Bienvenido a Glucoller</Text>
         {/* Cambiar Logo */}
-          <Image source={require('../assets/glucoller.png')} style={styles.logo} /> 
+          <Image source={require('../assets/logoGlucoller.png')} style={styles.logo} /> 
     
           <TextInput
             style={styles.input}

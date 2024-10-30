@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal, Platform } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
@@ -40,7 +39,7 @@ const HomeScreen = () => {
         requestPermissions();
     }, []);
 
-    // useEffect modificado que se ejecuta cuando la pantalla gana el foco
+    // Cargar datos del perfil cuando la pantalla gana el foco
     useEffect(() => {
         if (isFocused) {
             const loadProfileData = async () => {
@@ -67,21 +66,23 @@ const HomeScreen = () => {
     const sendNotification = async (level) => {
         let icon;
     
-        // Seleccionar la imagen según el nivel de precaución
+        // Define las rutas de los iconos correctamente
         if (level === "Hiperglucemia" || level === "Hipoglucemia") {
-            icon = require('../assets/dangerous.png'); // Para niveles peligrosos
+            icon = require('../assets/dangerous.png'); // Ruta al icono
         } else if (level === "Precaución") {
-            icon = require('../assets/precaution.png'); // Para nivel de precaución
+            icon = require('../assets/precaution.png'); // Ruta al icono
         } else {
-            icon = require('../assets/precaution.png'); // Ícono de precaución o uno específico para el estado normal
+            icon = require('../assets/normal.png'); // Ruta al icono
         }
     
         await Notifications.scheduleNotificationAsync({
             content: {
-                title: "Alerta de Glucosa",
+                
+                title: "Glucoller",
                 body: `Tu nivel de glucosa está en ${level} - ${glucoseLevel} mg/dl (${getCurrentTime()})`,
                 sound: true,
-                icon: icon, // Icono personalizado basado en el nivel de glucosa
+                // Probar a añadir el icono de esta forma
+                icon: require('../assets/normal.png'), // Icono personalizado basado en el nivel de glucosa
             },
             trigger: null, // Enviar de inmediato
         });
@@ -113,6 +114,10 @@ const HomeScreen = () => {
                 sendNotification("Precaución");
             } else if (newGlucoseLevel >= 180) {
                 sendNotification("Hiperglucemia");
+            } else if (newGlucoseLevel < 70) {
+                sendNotification("Hipoglucemia");
+            } else if (newGlucoseLevel >= 70 && newGlucoseLevel <= 130) {
+                sendNotification("Normal");
             }
         } catch (error) {
             console.error('Error al guardar la notificación:', error);
@@ -125,8 +130,10 @@ const HomeScreen = () => {
 
     const getCurrentTime = () => {
         const now = new Date();
-        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        // Formato de hora: HH:MM
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
+    
 
     const handleNotificationPress = () => {
         setModalVisible(true);
@@ -178,15 +185,15 @@ const HomeScreen = () => {
     const getCircleColor = () => {
         const glucose = parseInt(glucoseLevel, 10);
         if (glucose <= 70) {
-            return '#03A9F4';
+            return '#03A9F4'; // Azul para hipoglucemia
         } else if (glucose >= 180) {
-            return '#E53945';
+            return '#E53945'; // Rojo para hiperglucemia
         } else if (glucose >= 131 && glucose <= 179) {
-            return '#FFEB3B';
+            return '#FFEB3B'; // Amarillo para precaución
         } else if (glucose >= 71 && glucose <= 130) {
-            return '#A4C639';
+            return '#A4C639'; // Verde para normal
         } else {
-            return '#1D3557';
+            return '#1D3557'; // Color por defecto
         }
     };
 
