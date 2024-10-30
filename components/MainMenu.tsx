@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';  // Importar AsyncStorage
 import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
 import { DrawerActions } from '@react-navigation/native';
-
+import { useIsFocused } from '@react-navigation/native';
 
 const HomeScreen = () => {
     const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
@@ -13,28 +13,68 @@ const HomeScreen = () => {
     const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
     const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
     const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
+    const isFocused = useIsFocused();
+    const [notifications, setNotifications] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
 
+
+    // useEffect modificado que se ejecuta cuando la pantalla gana el foco
     useEffect(() => {
-        // Cargar el nombre del usuario y la imagen de perfil desde AsyncStorage
-        const loadProfileData = async () => {
-            try {
-                const name = await AsyncStorage.getItem('userName');
-                if (name) {
-                    const firstName = name.split(' ')[0];
-                    setUserName(firstName);
-                }
+        if (isFocused) {
+            const loadProfileData = async () => {
+                try {
+                    const name = await AsyncStorage.getItem('userName');
+                    if (name) {
+                        const firstName = name.split(' ')[0];
+                        setUserName(firstName);
+                    }
 
-                const savedImage = await AsyncStorage.getItem('profileImage');
-                if (savedImage) {
-                    setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                    const savedImage = await AsyncStorage.getItem('profileImage');
+                    if (savedImage) {
+                        setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                    }
+                } catch (error) {
+                    console.log('Error cargando la imagen o nombre del usuario', error);
                 }
-            } catch (error) {
-                console.log('Error cargando la imagen o nombre del usuario', error);
+            };
+
+            loadProfileData();
+        }
+    }, [isFocused]); // El efecto depende de isFocused
+
+
+    const handleNotificationPress = () => {
+        setModalVisible(true);
+    };
+
+    const handleNotificationDelete = (id) => {
+        const updatedNotifications = notifications.filter(notification => notification.id !== id);
+        setNotifications(updatedNotifications);
+        setNotificationCount(updatedNotifications.length);
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications)).catch((error) => {
+            console.error('Error al eliminar la notificación:', error);
+        });
+    };
+
+    const handleNotificationRead = (id) => {
+        const updatedNotifications = notifications.map(notification => {
+            if (notification.id === id) {
+                return { ...notification, read: true };
             }
-        };
+            return notification;
+        });
+        setNotifications(updatedNotifications);
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications)).catch((error) => {
+            console.error('Error al actualizar la notificación:', error);
+        });
+    };
 
-        loadProfileData();
-    }, []);
+
+    const handleViewAllNotifications = () => {
+        setModalVisible(false);
+        navigation.navigate('NotificationScreen', { notifications });
+    };
+
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());
@@ -52,16 +92,29 @@ const HomeScreen = () => {
     };
 
     // Función para manejar el evento del ícono de advertencia
-    const handleWarningPress = () => {
+    const handleWarningPress = async () => {
         const newGlucoseLevel = getRandomGlucoseLevel();
         setGlucoseLevel(newGlucoseLevel.toString());
-        setLastMeasurementTime(getCurrentTime()); // Guardar la hora de la última medición
-        setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de notificaciones
-    };
+        setLastMeasurementTime(getCurrentTime());
 
-    const handleNotificationPress = () => {
-        navigation.navigate('NotificationScreen'); // Navegar a la pantalla de notificaciones
-        setNotificationCount(0); // Resetear el contador al entrar en la pantalla de notificaciones
+        const newNotification = {
+            id: `${Date.now()}`,
+            title: 'Nueva Medición Registrada',
+            description: `Tu nivel de glucosa ha sido registrado: ${newGlucoseLevel} mg/dl`,
+            read: false,
+        };
+
+        try {
+            const storedNotifications = await AsyncStorage.getItem('notifications');
+            const currentNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
+            const updatedNotifications = [newNotification, ...currentNotifications];
+
+            setNotifications(updatedNotifications);
+            setNotificationCount(updatedNotifications.length);
+            await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        } catch (error) {
+            console.error('Error al guardar la notificación:', error);
+        }
     };
 
     const showNormalRange = () => {
@@ -114,10 +167,12 @@ const HomeScreen = () => {
                 </TouchableOpacity>
             </View>
             
+
             {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
 
-            <Image source={require('../assets/FotoPerfil.png')} style={styles.avatar} />
+            {/* Aquí mostramos la imagen de perfil actualizada */}
+            <Image source={profileImage} style={styles.avatar} />
 
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
@@ -125,6 +180,55 @@ const HomeScreen = () => {
                 <Text style={styles.circleText}>{glucoseLevel}</Text>
                 <Text style={styles.unitText}>mg/dl</Text>
             </View>
+            <Modal
+    animationType="slide"
+    transparent={true}
+    visible={modalVisible}
+    onRequestClose={() => {
+        setModalVisible(!modalVisible);
+    }}
+>
+    <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Notificaciones</Text>
+            <FlatList
+                data={notifications} // Muestra todas las notificaciones
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
+                        <Text style={styles.notificationTitle}>{item.title}</Text>
+                        <Text style={styles.notificationDescription}>{item.description}</Text>
+                        <View style={styles.notificationActions}>
+                            <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
+                                <Text style={styles.readButton}>Leer</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
+                                <Text style={styles.deleteButton}>Borrar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+                showsVerticalScrollIndicator={true} // Muestra el indicador de desplazamiento vertical
+                style={{ maxHeight: 400 }} // Ajusta la altura máxima del área de notificaciones
+            />
+            <TouchableOpacity
+                style={styles.viewAllButton}
+                onPress={handleViewAllNotifications}
+            >
+                <Text style={styles.viewAllButtonText}>Ver Todas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(!modalVisible)}
+            >
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+</Modal>
+
+
+
 
             {/* Texto dinámico según la medición */}
             {lastMeasurementTime ? (
@@ -197,11 +301,83 @@ const styles = StyleSheet.create({
         marginTop: -25,
     },
     avatar: {
-        width: 137,
-        height: 137,
-        borderRadius: 50,
+        width: 137,            // Ancho de la imagen
+        height: 137,           // Altura de la imagen (igual que el ancho para hacerlo cuadrado)
+        borderRadius: 68.5,    // Radio del borde, la mitad del ancho/altura para que sea circular
         marginTop: 20,
         marginBottom: 20,
+        borderWidth: 5,        // Grosor del borde (puedes ajustar este valor)
+        borderColor: '#e53945', // Color del borde (puedes cambiar a cualquier color que prefieras)
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        maxHeight: '70%', // Limita la altura máxima del modal para que haya espacio para el scroll
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    notificationItem: {
+        marginBottom: 15,
+        padding: 10,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 10,
+        width: '100%',
+    },
+    notificationRead: {
+        opacity: 0.6,
+    },
+    notificationTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    notificationDescription: {
+        fontSize: 14,
+        marginTop: 5,
+    },
+    notificationActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    readButton: {
+        color: '#1D3557',
+        fontWeight: 'bold',
+    },
+    deleteButton: {
+        color: '#E53945',
+        fontWeight: 'bold',
+    },
+    viewAllButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#1D3557',
+        borderRadius: 5,
+    },
+    viewAllButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    closeButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#e53945',
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
     subtitle: {
         fontSize: 22,

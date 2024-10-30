@@ -14,8 +14,9 @@ import RegisterScreen from './components/Register';
 import HomeScreen from './components/MainMenu';
 import ReporteScreen from './components/Reports';
 import ContactoScreen from './components/Contacts';
-import AddContactScreen from './components/AddContactScreen'; // Asegúrate de que esta pantalla esté importada
+import AddContactScreen from './components/AddContactScreen';
 import ProfileScreen from './components/ProfileScreen';
+import NotificationScreen from './components/NotificationScreen';
 
 // Pantallas de Configuración (que no aparecerán en el Drawer)
 import LanguageScreen from './components/LanguageScreen';
@@ -44,6 +45,7 @@ type RootStackParamList = {
   Reminders: undefined;
   Theme: undefined;
   PrivacyPolicy: undefined;
+  Notificaation: undefined;
 };
 
 
@@ -215,6 +217,12 @@ const App: React.FC = () => {
             component={PrivacyPolicyScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+          name="NotificationScreen"
+          component={NotificationScreen}
+          options={{ headerShown: false }}
+          />
+
         </Stack.Navigator>
       </SafeAreaView>
     </NavigationContainer>

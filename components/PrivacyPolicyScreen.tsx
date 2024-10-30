@@ -10,7 +10,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <FontAwesome name="arrow-left" size={24} color="#e53945" />
         </TouchableOpacity>
-        <Text style={styles.title}>Política de Privacidad</Text>
+        <Text style={styles.title}> Política de {'\n'}Privacidad</Text>
       </View>
 
       {/* Contenido de la política */}
@@ -60,14 +60,19 @@ const styles = StyleSheet.create({
     position: 'relative', // Permite posicionar el botón de retroceso
   },
   backButton: {
+    padding: 10,
     position: 'absolute',
-    left: 20, // Posiciona el botón de retroceso a la izquierda
+    top: -8,
+    left: 25,
+    zIndex: 3,
+    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
-    fontSize: 24,
+    top: -20,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#1D3557', // Mantiene el estilo azul oscuro
-    textAlign: 'center', // Asegura que el texto esté centrado
+    color: '#1D3557',
+    textAlign: 'center',
   },
   contentContainer: {
     padding: 20,
