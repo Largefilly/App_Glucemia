@@ -1,22 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';  // Importar AsyncStorage
-import { useNavigation } from '@react-navigation/native'; // Importamos useNavigation
-import { MaterialIcons, Ionicons } from '@expo/vector-icons'; // Importamos el ícono del menú
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
+
+// Configuración para manejar notificaciones en segundo plano
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+    }),
+});
 
 const HomeScreen = () => {
-    const [glucoseLevel, setGlucoseLevel] = useState('-'); // Estado para los niveles de glucosa
-    const [lastMeasurementTime, setLastMeasurementTime] = useState(null); // Estado para almacenar la última hora de medición
-    const [userName, setUserName] = useState(''); // Estado para almacenar el nombre del usuario
-    const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png')); // Imagen predeterminada
-    const navigation = useNavigation(); // Usamos useNavigation para controlar el drawer
-    const [notificationCount, setNotificationCount] = useState(0); // Estado para contar las notificaciones
+    const [glucoseLevel, setGlucoseLevel] = useState('-');
+    const [lastMeasurementTime, setLastMeasurementTime] = useState(null);
+    const [userName, setUserName] = useState('');
+    const [profileImage, setProfileImage] = useState(require('../assets/FotoPerfil.png'));
+    const navigation = useNavigation();
+    const [notificationCount, setNotificationCount] = useState(0);
     const isFocused = useIsFocused();
     const [notifications, setNotifications] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
 
+    // Solicitar permisos de notificación
+    useEffect(() => {
+        const requestPermissions = async () => {
+            const { status } = await Notifications.requestPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert("Permiso requerido", "Los permisos para notificaciones no fueron otorgados.");
+            }
+        };
+
+        requestPermissions();
+    }, []);
 
     // useEffect modificado que se ejecuta cuando la pantalla gana el foco
     useEffect(() => {
@@ -31,7 +52,7 @@ const HomeScreen = () => {
 
                     const savedImage = await AsyncStorage.getItem('profileImage');
                     if (savedImage) {
-                        setProfileImage({ uri: savedImage }); // Usar la imagen guardada
+                        setProfileImage({ uri: savedImage });
                     }
                 } catch (error) {
                     console.log('Error cargando la imagen o nombre del usuario', error);
@@ -40,8 +61,58 @@ const HomeScreen = () => {
 
             loadProfileData();
         }
-    }, [isFocused]); // El efecto depende de isFocused
+    }, [isFocused]);
 
+    const sendNotification = async (level) => {
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "Alerta de Glucosa",
+                body: `Tu nivel de glucosa está en ${level} - ${glucoseLevel} mg/dl (${getCurrentTime()})`,
+            },
+            trigger: null, // Enviar de inmediato
+        });
+    };
+
+    const handleWarningPress = async () => {
+        const newGlucoseLevel = getRandomGlucoseLevel();
+        setGlucoseLevel(newGlucoseLevel.toString());
+        setLastMeasurementTime(getCurrentTime());
+
+        const newNotification = {
+            id: `${Date.now()}`,
+            title: 'Nueva Medición Registrada',
+            description: `Tu nivel de glucosa ha sido registrado: ${newGlucoseLevel} mg/dl`,
+            read: false,
+        };
+
+        try {
+            const storedNotifications = await AsyncStorage.getItem('notifications');
+            const currentNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
+            const updatedNotifications = [newNotification, ...currentNotifications];
+
+            setNotifications(updatedNotifications);
+            setNotificationCount(updatedNotifications.length);
+            await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+
+            // Enviar una notificación solo si el nivel está en Precaución o Hiperglucemia
+            if (newGlucoseLevel >= 131 && newGlucoseLevel <= 179) {
+                sendNotification("Precaución");
+            } else if (newGlucoseLevel >= 180) {
+                sendNotification("Hiperglucemia");
+            }
+        } catch (error) {
+            console.error('Error al guardar la notificación:', error);
+        }
+    };
+
+    const getRandomGlucoseLevel = () => {
+        return Math.floor(Math.random() * (200 - 70 + 1)) + 70;
+    };
+
+    const getCurrentTime = () => {
+        const now = new Date();
+        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+    };
 
     const handleNotificationPress = () => {
         setModalVisible(true);
@@ -69,52 +140,9 @@ const HomeScreen = () => {
         });
     };
 
-
     const handleViewAllNotifications = () => {
         setModalVisible(false);
         navigation.navigate('NotificationScreen', { notifications });
-    };
-
-
-    const handleMenuPress = () => {
-        navigation.dispatch(DrawerActions.openDrawer());
-    };
-
-    // Función para generar un valor aleatorio entre 70 y 200
-    const getRandomGlucoseLevel = () => {
-        return Math.floor(Math.random() * (200 - 70 + 1)) + 70;
-    };
-
-    // Obtener la hora actual
-    const getCurrentTime = () => {
-        const now = new Date();
-        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-    };
-
-    // Función para manejar el evento del ícono de advertencia
-    const handleWarningPress = async () => {
-        const newGlucoseLevel = getRandomGlucoseLevel();
-        setGlucoseLevel(newGlucoseLevel.toString());
-        setLastMeasurementTime(getCurrentTime());
-
-        const newNotification = {
-            id: `${Date.now()}`,
-            title: 'Nueva Medición Registrada',
-            description: `Tu nivel de glucosa ha sido registrado: ${newGlucoseLevel} mg/dl`,
-            read: false,
-        };
-
-        try {
-            const storedNotifications = await AsyncStorage.getItem('notifications');
-            const currentNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
-            const updatedNotifications = [newNotification, ...currentNotifications];
-
-            setNotifications(updatedNotifications);
-            setNotificationCount(updatedNotifications.length);
-            await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-        } catch (error) {
-            console.error('Error al guardar la notificación:', error);
-        }
     };
 
     const showNormalRange = () => {
@@ -133,17 +161,16 @@ const HomeScreen = () => {
         Alert.alert("Rango Hiperglucemia", "180 - más mg/dl");
     };
 
-    // Obtener el color basado en el nivel de glucosa
     const getCircleColor = () => {
         const glucose = parseInt(glucoseLevel, 10);
         if (glucose <= 70) {
-            return '#03A9F4'; // Azul para hipoglucemia
+            return '#03A9F4';
         } else if (glucose >= 180) {
-            return '#E53945'; // Rojo para hiperglucemia
+            return '#E53945';
         } else if (glucose >= 131 && glucose <= 179) {
-            return '#FFEB3B'; // Amarillo para precaución
-        } else if (glucose >= 71 && glucose <= 130){
-            return '#A4C639'; // Verde para normal
+            return '#FFEB3B';
+        } else if (glucose >= 71 && glucose <= 130) {
+            return '#A4C639';
         } else {
             return '#1D3557';
         }
@@ -152,12 +179,10 @@ const HomeScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                {/* Botón de menú para abrir el Drawer */}
-                <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+                <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())} style={styles.menuButton}>
                     <MaterialIcons name="menu" size={35} color="#e53945" />
                 </TouchableOpacity>
-                 {/* Icono de notificaciones */}
-                 <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
+                <TouchableOpacity onPress={handleNotificationPress} style={styles.notificationButton}>
                     <Ionicons name="notifications-outline" size={35} color="#e53945" />
                     {notificationCount > 0 && (
                         <View style={styles.notificationBadge}>
@@ -166,78 +191,61 @@ const HomeScreen = () => {
                     )}
                 </TouchableOpacity>
             </View>
-            
 
-            {/* Mostrar el nombre del usuario registrado */}
             <Text style={styles.title}>Hola, {userName}</Text>
-
-            {/* Aquí mostramos la imagen de perfil actualizada */}
             <Image source={profileImage} style={styles.avatar} />
-
             <Text style={styles.subtitle}>Comienza tu día</Text>
 
             <View style={[styles.circleContainer, { borderColor: getCircleColor() }]}>
                 <Text style={styles.circleText}>{glucoseLevel}</Text>
                 <Text style={styles.unitText}>mg/dl</Text>
             </View>
+
             <Modal
-    animationType="slide"
-    transparent={true}
-    visible={modalVisible}
-    onRequestClose={() => {
-        setModalVisible(!modalVisible);
-    }}
->
-    <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Notificaciones</Text>
-            <FlatList
-                data={notifications} // Muestra todas las notificaciones
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
-                        <Text style={styles.notificationTitle}>{item.title}</Text>
-                        <Text style={styles.notificationDescription}>{item.description}</Text>
-                        <View style={styles.notificationActions}>
-                            <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
-                                <Text style={styles.readButton}>Leer</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
-                                <Text style={styles.deleteButton}>Borrar</Text>
-                            </TouchableOpacity>
-                        </View>
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(!modalVisible)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Notificaciones</Text>
+                        <FlatList
+                            data={notifications}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
+                                    <Text style={styles.notificationTitle}>{item.title}</Text>
+                                    <Text style={styles.notificationDescription}>{item.description}</Text>
+                                    <View style={styles.notificationActions}>
+                                        <TouchableOpacity onPress={() => handleNotificationRead(item.id)}>
+                                            <Text style={styles.readButton}>Leer</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handleNotificationDelete(item.id)}>
+                                            <Text style={styles.deleteButton}>Borrar</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )}
+                            showsVerticalScrollIndicator={true}
+                            style={{ maxHeight: 400 }}
+                        />
+                        <TouchableOpacity style={styles.viewAllButton} onPress={handleViewAllNotifications}>
+                            <Text style={styles.viewAllButtonText}>Ver Todas</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
                     </View>
-                )}
-                showsVerticalScrollIndicator={true} // Muestra el indicador de desplazamiento vertical
-                style={{ maxHeight: 400 }} // Ajusta la altura máxima del área de notificaciones
-            />
-            <TouchableOpacity
-                style={styles.viewAllButton}
-                onPress={handleViewAllNotifications}
-            >
-                <Text style={styles.viewAllButtonText}>Ver Todas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(!modalVisible)}
-            >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-</Modal>
+                </View>
+            </Modal>
 
-
-
-
-            {/* Texto dinámico según la medición */}
             {lastMeasurementTime ? (
                 <Text style={styles.reminderText}>Última medición a las {lastMeasurementTime}</Text>
             ) : (
                 <Text style={styles.reminderText}>No Olvides Medirte</Text>
             )}
 
-            {/* Indicadores de estados */}
             <View style={styles.statusContainer}>
                 <View style={styles.statusButton}>
                     <TouchableOpacity style={[styles.statusButton, { backgroundColor: '#A4C639' }]}
@@ -262,15 +270,15 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.warningContainer}>
-                    <TouchableOpacity onPress={handleWarningPress}>
-                        <Image source={require('../assets/warning.png')} style={styles.warningIcon} />
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.warningContainer}>
+                <TouchableOpacity onPress={handleWarningPress}>
+                    <Image source={require('../assets/warning.png')} style={styles.warningIcon} />
+                </TouchableOpacity>
+            </View>
             </View>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {

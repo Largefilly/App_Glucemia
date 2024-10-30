@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import * as Progress from 'react-native-progress';
-
-const { width } = Dimensions.get('window');
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
 
   return (
     <View style={styles.container}>
-      {/* Flecha para regresar a la pantalla principal */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <FontAwesome name="arrow-left" size={24} color="#e53945" />
       </TouchableOpacity>
 
-      {/* Título "Reporte" */}
       <Text style={styles.title}>Reportes</Text>
 
-      {/* Pestañas de navegación */}
       <View style={styles.tabNavigation}>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'MedicionGlucosa' && styles.tabButtonSelected]}
@@ -34,76 +28,37 @@ const ReporteScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Contenido basado en la pestaña seleccionada */}
       {selectedTab === 'MedicionGlucosa' ? <MedicionGlucosa /> : <RegistroReporte />}
     </View>
   );
 };
 
-const generateRandomPercentages = () => {
-  // Generar 4 números aleatorios
-  const randomNumbers = [Math.random(), Math.random(), Math.random(), Math.random()];
-
-  // Calcular la suma de los números aleatorios
-  const total = randomNumbers.reduce((acc, val) => acc + val, 0);
-  
-  // Calcular los porcentajes
-  const normal = (randomNumbers[0] / total) * 100;
-  const precaucion = (randomNumbers[1] / total) * 100;
-  const hipo = (randomNumbers[2] / total) * 100;
-  const hiper = (randomNumbers[3] / total) * 100;
-
-  return [
-    normal.toFixed(2),
-    precaucion.toFixed(2),
-    hipo.toFixed(2),
-    hiper.toFixed(2)
-  ];
-};
-
-// Componente para "Medición de Glucosa"
 const MedicionGlucosa = () => {
   const [glucoseLevel, setGlucoseLevel] = useState(0);
 
   useEffect(() => {
-    // Generar un número aleatorio entre 70 y 200 para simular una medición de glucosa
     const randomGlucose = Math.floor(Math.random() * (200 - 70 + 1)) + 70;
     setGlucoseLevel(randomGlucose);
   }, []);
 
-  // Función para obtener el color según el nivel de glucosa
   const getGlucoseColor = (level) => {
-    if (level < 70) return '#6FB5E1'; // Hipoglucemia
-    if (level >= 70 && level <= 110) return '#50E055'; // Normal
-    if (level > 110 && level <= 140) return '#F0F05F'; // Precaución
-    return '#E53945'; // Hiperglucemia
+    if (level < 70) return '#6FB5E1';
+    if (level >= 70 && level <= 110) return '#50E055';
+    if (level > 110 && level <= 140) return '#F0F05F';
+    return '#E53945';
   };
 
   return (
     <View style={styles.glucoseContainer}>
-      <Progress.Circle
-        style={{ marginTop: 10 }} 
-        size={150}
-        progress={glucoseLevel / 180} // Normalizar la medición para el progreso
-        showsText={true}
-        formatText={() => (
-          <Text style={styles.glucoseTextStyle}>{`${glucoseLevel} mg/dl`}</Text>
-        )}
-        color={getGlucoseColor(glucoseLevel)} // Usar el color basado en el nivel de glucosa
-        unfilledColor="#1D3557"
-        borderWidth={0}
-        thickness={10}
-      />
-      <Text style={styles.lastMeasurementText}>
-        Última medición de glucosa
-      </Text>
-      <Text style={styles.lastMeasurementText}>
-       17/10/2024 | 22:00
-      </Text>
+      <View style={[styles.circleContainer, { borderColor: getGlucoseColor(glucoseLevel) }]}>
+        <Text style={styles.circleText}>{glucoseLevel}</Text>
+        <Text style={styles.unitText}>mg/dl</Text>
+      </View>
+      <Text style={styles.lastMeasurementText}>Última medición de glucosa</Text>
+      <Text style={styles.lastMeasurementText}>17/10/2024 | 22:00</Text>
 
       <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
 
-      {/* Gráficos de Mediciones Anteriores */}
       <View style={styles.previousMeasurements}>
         <MeasurementCard title="Semanal" />
         <MeasurementCard title="Mensual" />
@@ -114,91 +69,40 @@ const MedicionGlucosa = () => {
   );
 };
 
-
-// Componente para "Registro del Reporte"
 const RegistroReporte = () => {
   const [normalPrecautionPercentage, setNormalPrecautionPercentage] = useState(0);
   const [hyperglycemiaPercentage, setHyperglycemiaPercentage] = useState(0);
   const [hypoglycemiaPercentage, setHypoglycemiaPercentage] = useState(0);
 
   useEffect(() => {
-    // Simulación de datos aleatorios para cada categoría
     setNormalPrecautionPercentage(Math.random());
     setHyperglycemiaPercentage(Math.random());
     setHypoglycemiaPercentage(Math.random());
   }, []);
 
-  // Datos para el histograma de dos semanas
-  const glucoseLevels = [70, 50, 90, 120, 80, 40, 120, 55, 75, 100, 85, 95, 65, 30]; // Ejemplo de niveles de glucosa
+  const glucoseLevels = [70, 50, 90, 120, 80, 40, 120, 55, 75, 100, 85, 95, 65, 30];
   const histogramData = glucoseLevels.map(level => {
-    if (level < 70) return '#6FB5E1'; // Hipoglucemia
-    if (level >= 70 && level <= 90) return '#50E055'; // Normal
-    if (level > 110) return '#E53945'; // Hiperglucemia
-    return '#F0F05F'; // Precaución
+    if (level < 70) return '#6FB5E1';
+    if (level >= 70 && level <= 90) return '#50E055';
+    if (level > 110) return '#E53945';
+    return '#F0F05F';
   });
 
   return (
     <View style={styles.chartContainer}>
-  {/* Gráfico Normal y Precaución, Hiperglucemia y Hipoglucemia en fila */}
-  <View style={styles.horizontalCharts}>
-    
-    {/* Normal y Precaución */}
-    <View style={styles.chartItem}>
-      <Text style={styles.chartTitle}>Normal y{"\n"}Precaución</Text>
-      <Progress.Circle
-        size={100}
-        progress={normalPrecautionPercentage}
-        showsText={true}
-        formatText={() => `${Math.round(normalPrecautionPercentage * 100)}%`}
-        color="#50E055"
-        unfilledColor="#F0F05F"
-        borderWidth={0}
-        thickness={8} // Grosor del círculo aumentado
-        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
-      />
-    </View>
+      <View style={styles.horizontalCharts}>
+        <CustomCircle title={"Normal y \n Precaución"} percentage={normalPrecautionPercentage} color="#50E055" />
+        <CustomCircle title="Hiperglucemia" percentage={hyperglycemiaPercentage} color="#E53945" />
+        <CustomCircle title="Hipoglucemia" percentage={hypoglycemiaPercentage} color="#6FB5E1" />
+      </View>
 
-    {/* Hiperglucemia */}
-    <View style={styles.chartItem}>
-      <Text style={styles.chartTitle}>Hiperglucemia{"\n"}</Text>
-      <Progress.Circle
-        size={100}
-        progress={hyperglycemiaPercentage}
-        showsText={true}
-        formatText={() => `${Math.round(hyperglycemiaPercentage * 100)}%`}
-        color="#E53945"
-        unfilledColor="#1D3557"
-        borderWidth={0}
-        thickness={8} // Grosor del círculo aumentado
-        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
-      />
-    </View>
-
-    {/* Hipoglucemia */}
-    <View style={styles.chartItem}>
-      <Text style={styles.chartTitle}>Hipoglucemia{"\n"}</Text>
-      <Progress.Circle
-        size={100}
-        progress={hypoglycemiaPercentage}
-        showsText={true}
-        formatText={() => `${Math.round(hypoglycemiaPercentage * 100)}%`}
-        color="#6FB5E1"
-        unfilledColor="#1D3557"
-        borderWidth={0}
-        thickness={8} // Grosor del círculo aumentado
-        textStyle={{ color: '#1D3557', fontWeight: 'bold', fontSize: 25}} // Color del texto dentro del círculo
-      />
-    </View>
-  </View>
-
-      {/* Análisis del Reporte */}
       <Text style={styles.analysisTitle}>Análisis del Reporte</Text>
       <View style={styles.line} />
       <View style={styles.histogramContainer}>
         {glucoseLevels.map((level, index) => (
           <View
             key={index}
-            style={[styles.bar, { height: (level / 120) * 100, backgroundColor: histogramData[index] }]} // Ajustar altura máxima aquí
+            style={[styles.bar, { height: (level / 120) * 100, backgroundColor: histogramData[index] }]}
           />
         ))}
       </View>
@@ -208,7 +112,6 @@ const RegistroReporte = () => {
         ))}
       </View>
 
-      {/* Sección "Contactos Notificados" */}
       <Text style={styles.contactsTitle}>Contactos Notificados</Text>
       <View style={styles.line} />
       <View style={styles.contactsContainer}>
@@ -230,6 +133,16 @@ const RegistroReporte = () => {
   );
 };
 
+// Componente de círculo personalizado para mostrar porcentaje
+const CustomCircle = ({ title, percentage, color }) => (
+  <View style={styles.chartItem}>
+    <Text style={styles.chartTitle}>{title}</Text>
+    <View style={[styles.circleContainer, { borderColor: color }]}>
+      <Text style={styles.circleText}>{Math.round(percentage * 100)}%</Text>
+    </View>
+  </View>
+);
+
 // Componente para las tarjetas de medición (Semanal, Mensual, Trimestral, Anual)
 const MeasurementCard = ({ title }) => {
   const [normal, precaucion, hipo, hiper] = generateRandomPercentages();
@@ -238,24 +151,36 @@ const MeasurementCard = ({ title }) => {
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
       <View style={styles.cardChart}>
-        <Text style={{ color: '#50E055', fontFamily: 'Inder_400Regular'}}>{normal}%</Text>
-        <Text style={{ color: '#F0F05F', fontFamily: 'Inder_400Regular'}}>{precaucion}%</Text>
-        <Text style={{ color: '#6FB5E1', fontFamily: 'Inder_400Regular'}}>{hipo}%</Text>
-        <Text style={{ color: '#E53945', fontFamily: 'Inder_400Regular'}}>{hiper}%</Text>
+        <Text style={{ color: '#50E055' }}>{normal}%</Text>
+        <Text style={{ color: '#F0F05F' }}>{precaucion}%</Text>
+        <Text style={{ color: '#6FB5E1' }}>{hipo}%</Text>
+        <Text style={{ color: '#E53945' }}>{hiper}%</Text>
       </View>
     </View>
   );
 };
 
+// Generar porcentajes aleatorios
+const generateRandomPercentages = () => {
+  const randomNumbers = [Math.random(), Math.random(), Math.random(), Math.random()];
+  const total = randomNumbers.reduce((acc, val) => acc + val, 0);
+
+  const normal = (randomNumbers[0] / total) * 100;
+  const precaucion = (randomNumbers[1] / total) * 100;
+  const hipo = (randomNumbers[2] / total) * 100;
+  const hiper = (randomNumbers[3] / total) * 100;
+
+  return [normal.toFixed(2), precaucion.toFixed(2), hipo.toFixed(2), hiper.toFixed(2)];
+};
+
 // Estilos
 const styles = StyleSheet.create({
   glucoseTextStyle: {
-    fontSize: 24, // Ajusta el tamaño de la fuente
-    color: '#1D3557', // Cambia el color a lo que prefieras
-    fontWeight: 'bold', // Puedes hacerla negrita si lo deseas
-  },  
+    fontSize: 24,
+    color: '#1D3557',
+    fontWeight: 'bold',
+  },
   container: {
-    fontFamily: 'Inder_400Regular',
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
@@ -267,7 +192,6 @@ const styles = StyleSheet.create({
     top: 33,
     left: 25,
     zIndex: 3,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   title: {
     fontSize: 30,
@@ -275,45 +199,54 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: -17,
     marginBottom: 30,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   tabNavigation: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 20,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButton: {
     padding: 10,
     marginHorizontal: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonSelected: {
     borderBottomColor: '#000',
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   tabButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1D3557',
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
   },
   glucoseContainer: {
-    fontFamily: 'Inder_400Regular',
     alignItems: 'center',
     marginVertical: 10,
   },
+  circleContainer: {
+    width: 110,
+    height: 110,
+    borderRadius: 75,
+    borderWidth: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  circleText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#1D3557',
+  },
+  unitText: {
+    fontSize: 16,
+    color: '#1D3557',
+  },
   lastMeasurementText: {
-    fontFamily: 'Inder_400Regular',
-    top: 10,
     marginTop: 5,
     color: '#1D3557',
   },
   sectionTitle: {
-    fontFamily: 'Inder_400Regular',
     fontSize: 18,
     marginTop: 70,
     fontWeight: 'bold',
@@ -321,13 +254,11 @@ const styles = StyleSheet.create({
     color: '#1D3557',
   },
   previousMeasurements: {
-    fontFamily: 'Inder_400Regular',
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 20,
   },
   card: {
-    fontFamily: 'Inder_400Regular',
     margin: 5,
     width: 80,
     height: 120,
@@ -337,7 +268,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cardTitle: {
-    fontFamily: 'Inder_400Regular',
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1D3557',
@@ -364,16 +294,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
     textAlign: 'center',
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   analysisTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   histogramContainer: {
     flexDirection: 'row',
@@ -395,16 +323,14 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 12,
     textAlign: 'center',
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   contactsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   line: {
     borderBottomColor: '#ccc',
@@ -426,13 +352,11 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 16,
     flex: 1,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
   contactDate: {
     fontSize: 12,
-    fontFamily: 'Inder_400Regular', // Añadir la fuente
-    color: '#1D3557', // Cambiar el color
+    color: '#1D3557',
   },
 });
 
