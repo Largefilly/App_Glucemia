@@ -63,26 +63,12 @@ const HomeScreen = () => {
         }
     }, [isFocused]);
 
-    const sendNotification = async (level) => {
-        let icon;
-    
-        // Define las rutas de los iconos correctamente
-        if (level === "Hiperglucemia" || level === "Hipoglucemia") {
-            icon = require('../assets/dangerous.png'); // Ruta al icono
-        } else if (level === "Precaución") {
-            icon = require('../assets/precaution.png'); // Ruta al icono
-        } else {
-            icon = require('../assets/normal.png'); // Ruta al icono
-        }
-    
+    const sendNotification = async (level, glucoseValue) => {
         await Notifications.scheduleNotificationAsync({
             content: {
-                
                 title: "Glucoller",
-                body: `Tu nivel de glucosa está en ${level} - ${glucoseLevel} mg/dl (${getCurrentTime()})`,
+                body: `Tu nivel de glucosa está en ${level} - ${glucoseValue} mg/dl${'\n'}${getCurrentTime()}`,
                 sound: true,
-                // Probar a añadir el icono de esta forma
-                icon: require('../assets/normal.png'), // Icono personalizado basado en el nivel de glucosa
             },
             trigger: null, // Enviar de inmediato
         });
@@ -109,15 +95,15 @@ const HomeScreen = () => {
             setNotificationCount(updatedNotifications.length);
             await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
 
-            // Enviar una notificación solo si el nivel está en Precaución o Hiperglucemia
+            // Enviar una notificación según el nivel de glucosa
             if (newGlucoseLevel >= 131 && newGlucoseLevel <= 179) {
-                sendNotification("Precaución");
+                sendNotification("Precaución ⚠️", newGlucoseLevel);
             } else if (newGlucoseLevel >= 180) {
-                sendNotification("Hiperglucemia");
+                sendNotification("Hiperglucemia 🚫", newGlucoseLevel);
             } else if (newGlucoseLevel < 70) {
-                sendNotification("Hipoglucemia");
+                sendNotification("Hipoglucemia 🚫", newGlucoseLevel);
             } else if (newGlucoseLevel >= 70 && newGlucoseLevel <= 130) {
-                sendNotification("Normal");
+                sendNotification("Normal ✅", newGlucoseLevel);
             }
         } catch (error) {
             console.error('Error al guardar la notificación:', error);
@@ -130,7 +116,6 @@ const HomeScreen = () => {
 
     const getCurrentTime = () => {
         const now = new Date();
-        // Formato de hora: HH:MM
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
     
