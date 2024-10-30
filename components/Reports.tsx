@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+const DefaultProfileImage = require('../assets/FotoPerfil.png');
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
@@ -65,6 +66,25 @@ const MedicionGlucosa = () => {
         <MeasurementCard title="Trimestral" />
         <MeasurementCard title="Anual" />
       </View>
+            {/* Leyenda de colores al final */}
+            <View style={styles.legendContainer}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#50E055' }]} />
+          <Text style={styles.legendText}>Normal (70 - 110 mg/dl)</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#F0F05F' }]} />
+          <Text style={styles.legendText}>Precaución (111 - 140 mg/dl)</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#6FB5E1' }]} />
+          <Text style={styles.legendText}>Hipoglucemia (&lt; 70 mg/dl)</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#E53945' }]} />
+          <Text style={styles.legendText}>Hiperglucemia (&gt; 140 mg/dl)</Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -119,24 +139,26 @@ const RegistroReporte = () => {
 
       <Text style={styles.contactsTitle}>Contactos Notificados</Text>
       <View style={styles.line} />
+      {/* Lista de contactos con imagen de perfil por defecto */}
       <View style={styles.contactsContainer}>
-        <View style={styles.contactCircle} />
+        <Image source={DefaultProfileImage} style={styles.contactImage} />
         <Text style={styles.contactName}>Maria Mercedes</Text>
         <Text style={styles.contactDate}>17/10 | 20:00</Text>
       </View>
       <View style={styles.contactsContainer}>
-        <View style={styles.contactCircle} />
+        <Image source={DefaultProfileImage} style={styles.contactImage} />
         <Text style={styles.contactName}>Nicki Nicole</Text>
         <Text style={styles.contactDate}>17/10 | 20:30</Text>
       </View>
       <View style={styles.contactsContainer}>
-        <View style={styles.contactCircle} />
+        <Image source={DefaultProfileImage} style={styles.contactImage} />
         <Text style={styles.contactName}>Bruno Mars</Text>
         <Text style={styles.contactDate}>17/10 | 21:00</Text>
       </View>
     </View>
   );
 };
+
 
 // Componente de círculo personalizado para mostrar porcentaje
 const CustomCircle = ({ title, percentage, color }) => (
@@ -346,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 5,
   },
-  contactCircle: {
+  contactImage: {
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -362,6 +384,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1D3557',
   },
+  legendContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingHorizontal: 15,
+    marginVertical: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  legendColor: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  legendText: {
+    fontSize: 14,
+    color: '#1D3557',
+  },
 });
+
 
 export default ReporteScreen;
