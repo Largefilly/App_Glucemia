@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
@@ -64,10 +65,23 @@ const HomeScreen = () => {
     }, [isFocused]);
 
     const sendNotification = async (level) => {
+        let icon;
+    
+        // Seleccionar la imagen según el nivel de precaución
+        if (level === "Hiperglucemia" || level === "Hipoglucemia") {
+            icon = require('../assets/dangerous.png'); // Para niveles peligrosos
+        } else if (level === "Precaución") {
+            icon = require('../assets/precaution.png'); // Para nivel de precaución
+        } else {
+            icon = require('../assets/precaution.png'); // Ícono de precaución o uno específico para el estado normal
+        }
+    
         await Notifications.scheduleNotificationAsync({
             content: {
                 title: "Alerta de Glucosa",
                 body: `Tu nivel de glucosa está en ${level} - ${glucoseLevel} mg/dl (${getCurrentTime()})`,
+                sound: true,
+                icon: icon, // Icono personalizado basado en el nivel de glucosa
             },
             trigger: null, // Enviar de inmediato
         });
