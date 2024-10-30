@@ -75,25 +75,30 @@ const RegistroReporte = () => {
   const [hypoglycemiaPercentage, setHypoglycemiaPercentage] = useState(0);
 
   useEffect(() => {
-    setNormalPrecautionPercentage(Math.random());
-    setHyperglycemiaPercentage(Math.random());
-    setHypoglycemiaPercentage(Math.random());
+    // Generar dos números aleatorios enteros que sumen hasta 100
+    const normalPrecaution = Math.floor(Math.random() * 100); // 0 a 99
+    const hyperglycemia = Math.floor(Math.random() * (100 - normalPrecaution)); // Hasta lo que queda para 100
+    const hypoglycemia = 100 - normalPrecaution - hyperglycemia; // Asegurar que la suma sea 100
+
+    setNormalPrecautionPercentage(normalPrecaution);
+    setHyperglycemiaPercentage(hyperglycemia);
+    setHypoglycemiaPercentage(hypoglycemia);
   }, []);
 
   const glucoseLevels = [70, 50, 90, 120, 80, 40, 120, 55, 75, 100, 85, 95, 65, 30];
   const histogramData = glucoseLevels.map(level => {
-    if (level < 70) return '#6FB5E1';
-    if (level >= 70 && level <= 90) return '#50E055';
-    if (level > 110) return '#E53945';
-    return '#F0F05F';
+    if (level < 70) return '#6FB5E1'; // Hipoglucemia
+    if (level >= 70 && level <= 90) return '#50E055'; // Normal y Precaución
+    if (level > 110) return '#E53945'; // Hiperglucemia
+    return '#F0F05F'; // Otro rango
   });
 
   return (
     <View style={styles.chartContainer}>
       <View style={styles.horizontalCharts}>
-        <CustomCircle title={"Normal y \n Precaución"} percentage={normalPrecautionPercentage} color="#50E055" />
-        <CustomCircle title="Hiperglucemia" percentage={hyperglycemiaPercentage} color="#E53945" />
-        <CustomCircle title="Hipoglucemia" percentage={hypoglycemiaPercentage} color="#6FB5E1" />
+        <CustomCircle title={"Normal y \n Precaución"} percentage={normalPrecautionPercentage/100} color="#50E055" />
+        <CustomCircle title={"\nHiperglucemia"} percentage={hyperglycemiaPercentage/100} color="#E53945" />
+        <CustomCircle title={"\nHipoglucemia"} percentage={hypoglycemiaPercentage/100} color="#6FB5E1" />
       </View>
 
       <Text style={styles.analysisTitle}>Análisis del Reporte</Text>
@@ -116,17 +121,17 @@ const RegistroReporte = () => {
       <View style={styles.line} />
       <View style={styles.contactsContainer}>
         <View style={styles.contactCircle} />
-        <Text style={styles.contactName}>Elber Gatieza</Text>
+        <Text style={styles.contactName}>Maria Mercedes</Text>
         <Text style={styles.contactDate}>17/10 | 20:00</Text>
       </View>
       <View style={styles.contactsContainer}>
         <View style={styles.contactCircle} />
-        <Text style={styles.contactName}>Mari Conazo</Text>
+        <Text style={styles.contactName}>Nicki Nicole</Text>
         <Text style={styles.contactDate}>17/10 | 20:30</Text>
       </View>
       <View style={styles.contactsContainer}>
         <View style={styles.contactCircle} />
-        <Text style={styles.contactName}>Mars Turbo</Text>
+        <Text style={styles.contactName}>Bruno Mars</Text>
         <Text style={styles.contactDate}>17/10 | 21:00</Text>
       </View>
     </View>
@@ -160,17 +165,16 @@ const MeasurementCard = ({ title }) => {
   );
 };
 
-// Generar porcentajes aleatorios
 const generateRandomPercentages = () => {
   const randomNumbers = [Math.random(), Math.random(), Math.random(), Math.random()];
   const total = randomNumbers.reduce((acc, val) => acc + val, 0);
 
-  const normal = (randomNumbers[0] / total) * 100;
-  const precaucion = (randomNumbers[1] / total) * 100;
-  const hipo = (randomNumbers[2] / total) * 100;
-  const hiper = (randomNumbers[3] / total) * 100;
+  const normal = parseFloat(((randomNumbers[0] / total) * 100).toFixed(2));
+  const precaucion = parseFloat(((randomNumbers[1] / total) * 100).toFixed(2));
+  const hipo = parseFloat(((randomNumbers[2] / total) * 100).toFixed(2));
+  const hiper = parseFloat((100 - normal - precaucion - hipo).toFixed(2)); // Ajusta el último valor para que sumen 100
 
-  return [normal.toFixed(2), precaucion.toFixed(2), hipo.toFixed(2), hiper.toFixed(2)];
+  return [normal, precaucion, hipo, hiper];
 };
 
 // Estilos

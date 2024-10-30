@@ -44,7 +44,7 @@ const NotificationScreen = ({ route }) => {
 
             {/* Título de la pantalla */}
             <View style={styles.titleContainer}>
-                <Text style={styles.title}>Historial Completo de Notificaciones</Text>
+                <Text style={styles.title}>Historial Completo{'\n'}de Notificaciones</Text>
             </View>
             
             {/* Lista de notificaciones */}
@@ -76,14 +76,15 @@ const styles = StyleSheet.create({
         zIndex: 1,
         backgroundColor: '#fff',
         borderRadius: 50,
-        elevation: 3, // Añadir una pequeña sombra para dar profundidad al botón
     },
     titleContainer: {
         marginTop: 90, // Espacio para evitar la superposición con el botón de retroceso
         alignItems: 'center',
     },
     title: {
-        fontSize: 20, // Reducido el tamaño de la fuente
+        top:-40,
+        marginTop:-17,
+        fontSize: 22, // Reducido el tamaño de la fuente
         fontWeight: 'bold',
         color: '#1D3557', // Color azul usado en la app
         textAlign: 'center',

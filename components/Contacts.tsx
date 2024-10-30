@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    top: -16,
-    right: -80,
+    top: -20,
+    right: -100,
     marginBottom: -25,
     fontFamily: 'Inder_400Regular', // Añadir la fuente
     color: '#1D3557', // Cambiar el color

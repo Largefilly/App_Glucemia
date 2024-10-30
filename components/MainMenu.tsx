@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
         borderWidth: 5,        // Grosor del borde (puedes ajustar este valor)
-        borderColor: '#e53945', // Color del borde (puedes cambiar a cualquier color que prefieras)
+        borderColor: '#A8DADB', // Color del borde (puedes cambiar a cualquier color que prefieras)
     },
     modalContainer: {
         flex: 1,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     },
     statusButton: {
         marginLeft:5,
-        width:124,
+        width:130,
         margin: 5,
         justifyContent: 'center',
         paddingVertical: 10,

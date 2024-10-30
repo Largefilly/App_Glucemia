@@ -5,13 +5,13 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const EditProfileScreen = ({ navigation }) => {
   // Inicializar el estado con el nombre completo
-  const [name, setName] = useState('Cindy Nero');
-  const [nickname, setNickname] = useState('cindy_nero');
-  const [email, setEmail] = useState('youremail@domain.com');
-  const [phone, setPhone] = useState('123-456-7890');
-  const [country, setCountry] = useState('Estados Unidos');
-  const [gender, setGender] = useState('Femenino');
-  const [address, setAddress] = useState('Jiron Aquiles Castro');
+  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('');
+  const [gender, setGender] = useState('');
+  const [address, setAddress] = useState('');
 
   // Separar el primer nombre y apellido
   const [firstName, lastName] = name.split(' ');
