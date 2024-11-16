@@ -6,6 +6,10 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
+import io from 'socket.io-client';
+
+const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
+
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
@@ -26,6 +30,7 @@ const HomeScreen = () => {
     const isFocused = useIsFocused();
     const [notifications, setNotifications] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null); 
 
     // Solicitar permisos de notificación
     useEffect(() => {
@@ -41,27 +46,61 @@ const HomeScreen = () => {
 
     // Cargar datos del perfil cuando la pantalla gana el foco
     useEffect(() => {
-        if (isFocused) {
-            const loadProfileData = async () => {
-                try {
-                    const name = await AsyncStorage.getItem('userName');
-                    if (name) {
-                        const firstName = name.split(' ')[0];
-                        setUserName(firstName);
-                    }
-
-                    const savedImage = await AsyncStorage.getItem('profileImage');
-                    if (savedImage) {
-                        setProfileImage({ uri: savedImage });
-                    }
-                } catch (error) {
-                    console.log('Error cargando la imagen o nombre del usuario', error);
+        const loadProfileDataAndSubscribeToGlucose = async () => {
+            try {
+                // Cargar nombre de usuario desde AsyncStorage
+                const name = await AsyncStorage.getItem('userName');
+                if (name) {
+                    const firstName = name.split(' ')[0];
+                    setUserName(firstName);
                 }
-            };
+    
+                // Cargar imagen de perfil desde AsyncStorage
+                const savedImage = await AsyncStorage.getItem('profileImage');
+                if (savedImage) {
+                    setProfileImage({ uri: savedImage });
+                }
+            } catch (error) {
+                console.log('Error cargando la imagen o nombre del usuario', error);
+            }
+    
+            // Suscribirse a las actualizaciones de glucosa del socket
+            socket.on('glucoseUpdate', (newGlucoseValue) => {
+                setGlucoseLevel(newGlucoseValue.toString());
+                setLastMeasurementTime(getCurrentTime());
+                setNotificationCount((prevCount) => prevCount + 1);
 
-            loadProfileData();
-        }
-    }, [isFocused]);
+                // Verificar si el nivel de glucosa es diferente al último procesado
+                const newGlucoseLevel = parseInt(newGlucoseValue);
+                if (newGlucoseLevel !== lastGlucoseLevel) {
+                    setLastGlucoseLevel(newGlucoseLevel); // Actualizar el último nivel de glucosa procesado
+                    
+                    // Lógica para enviar notificaciones basadas en el nivel de glucosa
+                    if (newGlucoseLevel >= 131 && newGlucoseLevel <= 179) {
+                        sendNotification("Precaución ⚠️", newGlucoseLevel);
+                    } else if (newGlucoseLevel >= 180) {
+                        sendNotification("Hiperglucemia 🚫", newGlucoseLevel);
+                    } else if (newGlucoseLevel < 70) {
+                        sendNotification("Hipoglucemia 🚫", newGlucoseLevel);
+                    } else if (newGlucoseLevel >= 70 && newGlucoseLevel <= 130) {
+                        sendNotification("Normal ✅", newGlucoseLevel);
+                    }
+                }
+            });
+        };
+    
+        loadProfileDataAndSubscribeToGlucose();
+    
+        // Limpiar la suscripción del socket cuando el componente se desmonte
+        return () => {
+            socket.off('glucoseUpdate');
+        };
+    }, [lastGlucoseLevel]); // Se incluye `lastGlucoseLevel` como dependencia
+
+    const handleMenuPress = () => {
+        navigation.dispatch(DrawerActions.openDrawer());
+    };
+    
 
     const sendNotification = async (level, glucoseValue) => {
         await Notifications.scheduleNotificationAsync({
@@ -73,56 +112,30 @@ const HomeScreen = () => {
             trigger: null, // Enviar de inmediato
         });
     };
+    
 
-    const handleWarningPress = async () => {
-        const newGlucoseLevel = getRandomGlucoseLevel();
-        setGlucoseLevel(newGlucoseLevel.toString());
-        setLastMeasurementTime(getCurrentTime());
+    const handleWarningPress = () => {
 
-        const newNotification = {
-            id: `${Date.now()}`,
-            title: 'Nueva Medición Registrada',
-            description: `Tu nivel de glucosa ha sido registrado: ${newGlucoseLevel} mg/dl`,
-            read: false,
-        };
-
-        try {
-            const storedNotifications = await AsyncStorage.getItem('notifications');
-            const currentNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
-            const updatedNotifications = [newNotification, ...currentNotifications];
-
-            setNotifications(updatedNotifications);
-            setNotificationCount(updatedNotifications.length);
-            await AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-
-            // Enviar una notificación según el nivel de glucosa
-            if (newGlucoseLevel >= 131 && newGlucoseLevel <= 179) {
-                sendNotification("Precaución ⚠️", newGlucoseLevel);
-            } else if (newGlucoseLevel >= 180) {
-                sendNotification("Hiperglucemia 🚫", newGlucoseLevel);
-            } else if (newGlucoseLevel < 70) {
-                sendNotification("Hipoglucemia 🚫", newGlucoseLevel);
-            } else if (newGlucoseLevel >= 70 && newGlucoseLevel <= 130) {
-                sendNotification("Normal ✅", newGlucoseLevel);
-            }
-        } catch (error) {
-            console.error('Error al guardar la notificación:', error);
-        }
     };
-
+    
     const getRandomGlucoseLevel = () => {
         return Math.floor(Math.random() * (200 - 70 + 1)) + 70;
     };
 
     const getCurrentTime = () => {
         const now = new Date();
+        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        // Formato de hora: HH:MM
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
-    
 
     const handleNotificationPress = () => {
-        setModalVisible(true);
+        setModalVisible(true); // Abrir el modal al presionar el botón de notificaciones
     };
+    const handleCloseModal = () => {
+        setModalVisible(false); // Cerrar el modal
+    };
+
 
     const handleNotificationDelete = (id) => {
         const updatedNotifications = notifications.filter(notification => notification.id !== id);
@@ -181,6 +194,11 @@ const HomeScreen = () => {
             return '#1D3557'; // Color por defecto
         }
     };
+
+    const showRangeAlert = (title, range) => {
+        Alert.alert(title, range);
+    };
+    
 
     return (
         <SafeAreaView style={styles.container}>
