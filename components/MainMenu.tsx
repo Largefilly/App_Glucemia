@@ -44,6 +44,22 @@ const HomeScreen = () => {
         requestPermissions();
     }, []);
 
+    useEffect(() => {
+        const loadStoredNotifications = async () => {
+            try {
+                const storedNotifications = await AsyncStorage.getItem('notifications');
+                if (storedNotifications) {
+                    setNotifications(JSON.parse(storedNotifications));
+                    const unreadCount = JSON.parse(storedNotifications).filter(notif => !notif.read).length;
+                    setNotificationCount(unreadCount);
+                }
+            } catch (error) {
+                console.error('Error al cargar las notificaciones almacenadas:', error);
+            }
+        };
+    
+        loadStoredNotifications();
+    }, []);
     // Cargar datos del perfil cuando la pantalla gana el foco
     useEffect(() => {
         const loadProfileDataAndSubscribeToGlucose = async () => {
@@ -103,6 +119,16 @@ const HomeScreen = () => {
     
 
     const sendNotification = async (level, glucoseValue) => {
+        const newNotification = {
+            id: Date.now().toString(),
+            title: `Nivel de glucosa: ${glucoseValue} mg/dl`,
+            description: level,
+            read: false,
+        };
+
+        setNotifications((prev) => [newNotification, ...prev]); // Agregar al historial
+        setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de no leídas
+
         await Notifications.scheduleNotificationAsync({
             content: {
                 title: "Glucoller",
@@ -130,8 +156,16 @@ const HomeScreen = () => {
     };
 
     const handleNotificationPress = () => {
-        setModalVisible(true); // Abrir el modal al presionar el botón de notificaciones
+        setModalVisible(true);
+        // Marcar todas las notificaciones como leídas
+        const updatedNotifications = notifications.map((notification) => ({
+            ...notification,
+            read: true,
+        }));
+        setNotifications(updatedNotifications);
+        setNotificationCount(0); // Reiniciar el contador de no leídas
     };
+
     const handleCloseModal = () => {
         setModalVisible(false); // Cerrar el modal
     };
