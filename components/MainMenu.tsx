@@ -7,9 +7,10 @@ import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
 import io from 'socket.io-client';
+import { Audio } from 'expo-av';
+
 
 const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
-
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
@@ -117,7 +118,6 @@ const HomeScreen = () => {
         navigation.dispatch(DrawerActions.openDrawer());
     };
     
-
     const sendNotification = async (level, glucoseValue) => {
         const newNotification = {
             id: Date.now().toString(),
@@ -125,23 +125,62 @@ const HomeScreen = () => {
             description: level,
             read: false,
         };
-
+    
         setNotifications((prev) => [newNotification, ...prev]); // Agregar al historial
         setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de no leídas
-
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: "Glucoller",
-                body: `Tu nivel de glucosa está en ${level} - ${glucoseValue} mg/dl${'\n'}${getCurrentTime()}`,
-                sound: true,
-            },
-            trigger: null, // Enviar de inmediato
-        });
-    };
     
+        // Función para reproducir el sonido de la notificación
+        const playSound = async (times, glucoseValue, level) => {
+            try {
+                // Mostrar una única notificación con los valores actualizados
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "Glucoller",
+                        body: `Tu nivel de glucosa está en ${glucoseValue} mg/dl - ${level}\n${getCurrentTime()}`,
+                    },
+                    trigger: null, // Enviar la notificación de inmediato
+                });
+        
+                for (let i = 0; i < times; i++) {
+                    // Cargar el sonido en cada iteración
+                    const { sound } = await Audio.Sound.createAsync(
+                        require('../assets/sound/notif.mp3') // Ruta al archivo de sonido
+                    );
+        
+                    // Reproducir el sonido
+                    await sound.playAsync();
+        
+                    // Esperar a que termine de reproducirse
+                    await new Promise<void>((resolve) => {
+                        sound.setOnPlaybackStatusUpdate((status) => {
+                            if (status.isLoaded && status.didJustFinish) {
+                                sound.unloadAsync(); // Descargar el sonido después de terminar
+                                resolve(); // Resolver la promesa cuando el sonido termine
+                            }
+                        });
+                    });
+        
+                    // Esperar antes de la siguiente iteración (500 ms entre sonidos)
+                    if (i < times - 1) await new Promise<void>((resolve) => setTimeout(resolve, 500));
+                }
+            } catch (error) {
+                console.error("Error al reproducir el sonido:", error);
+            }
+        };
+        
+        // Asegurarse de pasar los valores de glucoseValue y level cuando se llame
+        if (level === "Hiperglucemia 🚫" || level === "Hipoglucemia 🚫") {
+            // Reproducir el sonido 4 veces para niveles críticos, pasando el valor de glucosa y el nivel
+            playSound(4, glucoseValue, level);
+        } else {
+            // Reproducir el sonido solo una vez para niveles normales o de precaución, pasando el valor de glucosa y el nivel
+            playSound(1, glucoseValue, level);
+        }     
+        
+    };    
+   
 
-    const handleWarningPress = () => {
-
+    const handleWarningPress = async () => {
     };
     
     const getRandomGlucoseLevel = () => {
@@ -232,7 +271,6 @@ const HomeScreen = () => {
     const showRangeAlert = (title, range) => {
         Alert.alert(title, range);
     };
-    
 
     return (
         <SafeAreaView style={styles.container}>
