@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
+import io from 'socket.io-client';
+const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
@@ -10,6 +12,10 @@ const ReporteScreen = ({ navigation }) => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <FontAwesome name="arrow-left" size={24} color="#e53945" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.downloadButton} onPress={() => alert('Se descargó el reporte correctamente')}>
+        <FontAwesome name="download" size={30} color="#e53945" />
       </TouchableOpacity>
 
       <Text style={styles.title}>Reportes</Text>
@@ -35,12 +41,30 @@ const ReporteScreen = ({ navigation }) => {
 };
 
 const MedicionGlucosa = () => {
-  const [glucoseLevel, setGlucoseLevel] = useState(0);
+  const [glucoseLevel, setGlucoseLevel] = useState('-');
+  const [lastMeasurementTime, setLastMeasurementTime] = useState(null);
+  const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null); 
 
   useEffect(() => {
-    const randomGlucose = Math.floor(Math.random() * (200 - 70 + 1)) + 70;
-    setGlucoseLevel(randomGlucose);
+    // Aquí escuchamos el evento 'glucoseMeasurement' desde el servidor para obtener el valor de glucosa real
+    socket.on('glucoseUpdate', (newGlucoseValue) => {
+      setGlucoseLevel(newGlucoseValue.toString());
+      const currentTime = new Date().toLocaleString(); 
+       // Get the current timestamp.
+      setLastMeasurementTime(currentTime);
+      // Verificar si el nivel de glucosa es diferente al último procesado
+      const newGlucoseLevel = parseInt(newGlucoseValue);
+      if (newGlucoseLevel !== lastGlucoseLevel) {
+          setLastGlucoseLevel(newGlucoseLevel); // Actualizar el último nivel de glucosa procesado
+          
+      }
+  });
+    // Cleanup: cuando el componente se desmonta, dejamos de escuchar el evento.
+    return () => {
+      socket.off('glucoseUpdate');
+    };
   }, []);
+
 
   const getGlucoseColor = (level) => {
     if (level < 70) return '#6FB5E1';
@@ -55,9 +79,8 @@ const MedicionGlucosa = () => {
         <Text style={styles.circleText}>{glucoseLevel}</Text>
         <Text style={styles.unitText}>mg/dl</Text>
       </View>
-      <Text style={styles.lastMeasurementText}>Última medición de glucosa</Text>
-      <Text style={styles.lastMeasurementText}>17/10/2024 | 22:00</Text>
-
+      <Text style={styles.lastMeasurementText}>Última medicion: {lastMeasurementTime}</Text>
+      
       <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
 
       <View style={styles.previousMeasurements}>
@@ -88,6 +111,8 @@ const MedicionGlucosa = () => {
     </View>
   );
 };
+
+
 
 const RegistroReporte = () => {
   const [normalPrecautionPercentage, setNormalPrecautionPercentage] = useState(0);
@@ -274,7 +299,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    marginTop: 70,
+    marginTop: 20,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#1D3557',
@@ -404,6 +429,15 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 14,
     color: '#1D3557',
+  },
+  downloadButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
