@@ -10,7 +10,7 @@ import io from 'socket.io-client';
 import { Audio } from 'expo-av';
 
 
-const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
+const socket = io("http://192.168.18.6:3000");
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
