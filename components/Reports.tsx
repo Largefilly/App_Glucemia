@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing'; // Para abrir el PDF
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
+
 import io from 'socket.io-client';
 const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
 
@@ -11,7 +14,7 @@ const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
   const [mediciones, setMediciones] = useState([]); // Estado para almacenar las mediciones
 
-  // Datos de ejemplo para las mediciones
+  // Datos de ejemplo para las mediciones (con temporalidad en "tipo")
   const datosMediciones = [
     { hora: '08:00', valor: 120, tipo: 'Diaria' },
     { hora: '12:00', valor: 110, tipo: 'Diaria' },
@@ -24,62 +27,178 @@ const ReporteScreen = ({ navigation }) => {
     setMediciones(datosMediciones);
   }, []);
 
-  // Función para generar el PDF
+  // Función para generar un gráfico SVG a partir de las mediciones
+  const generateChartSVG = (mediciones) => {
+    if (!mediciones || mediciones.length === 0) return '';
+    const width = 500;
+    const height = 300;
+    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+    const n = mediciones.length;
+    const xStep = (width - margin.left - margin.right) / (n - 1);
+    const values = mediciones.map(m => m.valor);
+    let minVal = Math.min(...values);
+    let maxVal = Math.max(...values);
+    const padding = (maxVal - minVal) * 0.1;
+    minVal -= padding;
+    maxVal += padding;
+
+    // Función de escala para el eje Y (recordando que 0 está arriba en SVG)
+    const yScale = (val) =>
+      margin.top + ((maxVal - val) / (maxVal - minVal)) * (height - margin.top - margin.bottom);
+
+    // Generar puntos para la línea del gráfico
+    let points = '';
+    for (let i = 0; i < n; i++) {
+      const x = margin.left + i * xStep;
+      const y = yScale(mediciones[i].valor);
+      points += `${x},${y} `;
+    }
+
+    // Etiquetas en el eje X (horas)
+    let xLabels = '';
+    for (let i = 0; i < n; i++) {
+      const x = margin.left + i * xStep;
+      xLabels += `<text x="${x}" y="${height - margin.bottom + 15}" font-size="12" text-anchor="middle">${mediciones[i].hora}</text>`;
+    }
+
+    // Generar marcas del eje Y (ticks)
+    const numTicks = 5;
+    let yTicks = '';
+    for (let i = 0; i <= numTicks; i++) {
+      const tickVal = minVal + i * ((maxVal - minVal) / numTicks);
+      const y = yScale(tickVal);
+      yTicks += `<text x="${margin.left - 10}" y="${y + 4}" font-size="12" text-anchor="end">${Math.round(tickVal)}</text>`;
+      yTicks += `<line x1="${margin.left - 5}" y1="${y}" x2="${margin.left}" y2="${y}" stroke="#000" stroke-width="1"/>`;
+    }
+
+    // Construir el SVG completo
+    const svg = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <!-- Eje X -->
+        <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#000" stroke-width="2"/>
+        <!-- Eje Y -->
+        <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#000" stroke-width="2"/>
+        ${yTicks}
+        <!-- Línea de datos -->
+        <polyline points="${points}" fill="none" stroke="#1D3557" stroke-width="3"/>
+        <!-- Puntos de datos -->
+        ${mediciones
+          .map((m, i) => {
+            const x = margin.left + i * xStep;
+            const y = yScale(m.valor);
+            return `<circle cx="${x}" cy="${y}" r="4" fill="#E53945" />`;
+          })
+          .join('')}
+        ${xLabels}
+      </svg>
+    `;
+    return svg;
+  };
+
+  // Función para generar el PDF con HTML embellecido, datos del paciente y gráfico SVG
   const generatePDF = async () => {
     try {
-      // Crear el contenido HTML del PDF
+      // Datos del paciente (estos valores pueden venir de un estado, props o de la base de datos)
+      const nombreCompleto = "Juan Pérez";
+      const edad = 35;
+      const sexo = "Masculino";
+
+      // Cargar el logo desde assets y convertirlo a base64
+      const logoAsset = Asset.fromModule(require('../assets/onlylogo.png'));
+      await logoAsset.downloadAsync();
+      const logoUri = logoAsset.localUri;
+      const logoBase64 = await FileSystem.readAsStringAsync(logoUri, { encoding: FileSystem.EncodingType.Base64 });
+      const logoDataUrl = `data:image/png;base64,${logoBase64}`;
+
+      const svgChart = generateChartSVG(mediciones);
+      const now = new Date();
+      const day = now.getDate().toString().padStart(2, '0');
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const year = now.getFullYear();
+      const fileName = `Reporte ${day}/${month}/${year}`;
+      const dateString = `${day}/${month}/${year} ${now.toLocaleTimeString()}`;
+
       const htmlContent = `
         <html>
           <head>
             <style>
-              body { font-family: Arial, sans-serif; }
-              h1 { color: #1D3557; text-align: center; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .header { border-bottom: 2px solid #1D3557; padding-bottom: 20px; margin-bottom: 20px; }
+              .patient-info { display: flex; align-items: center; justify-content: space-between; }
+              .patient-info img { width: 100px; }
+              .patient-details { text-align: right; }
+              .patient-details p { margin: 2px 0; font-size: 14px; }
+              h1 { color: #1D3557; text-align: center; margin: 10px 0; }
+              .table-container { margin-bottom: 30px; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
               th { background-color: #f0faf8; }
+              .chart-container { text-align: center; margin-bottom: 30px; }
               .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #666; }
             </style>
           </head>
           <body>
-            <h1>Reporte de Medición de Glucosa</h1>
-            <table>
-              <tr>
-                <th>Hora</th>
-                <th>Valor (mg/dl)</th>
-                <th>Tipo</th>
-              </tr>
-              ${mediciones
-                .map(
-                  (medicion) => `
+            <div class="header">
+              <div class="patient-info">
+                <div class="logo">
+                  <img src="${logoDataUrl}" alt="Logo de Glucoller" />
+                </div>
+                <div class="patient-details">
+                  <p><strong>Nombre:</strong> ${nombreCompleto}</p>
+                  <p><strong>Edad:</strong> ${edad}</p>
+                  <p><strong>Sexo:</strong> ${sexo}</p>
+                </div>
+              </div>
+              <h1>Reporte de Medición de Glucosa</h1>
+              <p style="text-align: center;">Generado el ${dateString}</p>
+            </div>
+
+            <div class="table-container">
+              <h2>Datos de Mediciones</h2>
+              <table>
                 <tr>
-                  <td>${medicion.hora}</td>
-                  <td>${medicion.valor}</td>
-                  <td>${medicion.tipo}</td>
+                  <th>Hora</th>
+                  <th>Valor (mg/dl)</th>
+                  <th>Temporalidad</th>
                 </tr>
-              `
-                )
-                .join('')}
-            </table>
+                ${mediciones
+                  .map(
+                    (medicion) => `
+                  <tr>
+                    <td>${medicion.hora}</td>
+                    <td>${medicion.valor}</td>
+                    <td>${medicion.tipo}</td>
+                  </tr>
+                `
+                  )
+                  .join('')}
+              </table>
+            </div>
+
+            <div class="chart-container">
+              <h2>Gráfico de Mediciones</h2>
+              ${svgChart}
+            </div>
+
             <div class="footer">
-              Reporte generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
+              Reporte generado el ${now.toLocaleDateString()} a las ${now.toLocaleTimeString()}
             </div>
           </body>
         </html>
       `;
 
-      // Generar el PDF
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
-
-      // Notificar al usuario
       Alert.alert('Éxito', 'El PDF se ha generado correctamente.', [
         {
           text: 'Abrir PDF',
-          onPress: () => Sharing.shareAsync(uri), // Abrir el PDF
+          onPress: () =>
+            Sharing.shareAsync(uri, {
+              mimeType: 'application/pdf',
+              dialogTitle: fileName,
+            }),
         },
-        {
-          text: 'OK',
-          style: 'cancel',
-        },
+        { text: 'OK', style: 'cancel' },
       ]);
     } catch (error) {
       console.error(error);
@@ -135,7 +254,6 @@ const MedicionGlucosa = () => {
         setLastGlucoseLevel(newGlucoseLevel);
       }
     });
-
     return () => {
       socket.off('glucoseUpdate');
     };
@@ -157,7 +275,6 @@ const MedicionGlucosa = () => {
       <Text style={styles.lastMeasurementText}>Última medición: {lastMeasurementTime}</Text>
 
       <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
-
       <View style={styles.previousMeasurements}>
         <MeasurementCard title="Semanal" />
         <MeasurementCard title="Mensual" />
@@ -256,7 +373,6 @@ const RegistroReporte = () => {
   );
 };
 
-// Componentes adicionales y estilos
 const CustomCircle = ({ title, percentage, color }) => (
   <View style={styles.chartItem}>
     <Text style={styles.chartTitle}>{title}</Text>
@@ -268,7 +384,6 @@ const CustomCircle = ({ title, percentage, color }) => (
 
 const MeasurementCard = ({ title }) => {
   const [normal, precaucion, hipo, hiper] = generateRandomPercentages();
-
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
@@ -285,16 +400,13 @@ const MeasurementCard = ({ title }) => {
 const generateRandomPercentages = () => {
   const randomNumbers = [Math.random(), Math.random(), Math.random(), Math.random()];
   const total = randomNumbers.reduce((acc, val) => acc + val, 0);
-
   const normal = parseFloat(((randomNumbers[0] / total) * 100).toFixed(2));
   const precaucion = parseFloat(((randomNumbers[1] / total) * 100).toFixed(2));
   const hipo = parseFloat(((randomNumbers[2] / total) * 100).toFixed(2));
   const hiper = parseFloat((100 - normal - precaucion - hipo).toFixed(2));
-
   return [normal, precaucion, hipo, hiper];
 };
 
-// Estilos (igual que antes)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
