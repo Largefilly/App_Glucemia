@@ -1,10 +1,8 @@
-import React, { useEffect, useState, createContext } from 'react';import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useState, createContext } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Font from 'expo-font';
-
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importamos el Drawer Navigator
-
-// Asegúrate de instalar las fuentes de Expo Google Fonts si aún no lo has hecho
 import { useFonts, Inder_400Regular } from '@expo-google-fonts/inder';
 import { StatusBar, SafeAreaView, ActivityIndicator } from 'react-native';
 
@@ -17,6 +15,7 @@ import ContactoScreen from './components/Contacts';
 import AddContactScreen from './components/AddContactScreen';
 import ProfileScreen from './components/ProfileScreen';
 import NotificationScreen from './components/NotificationScreen';
+import NutritionInfoScreen from './components/NutritionInfoScreen'; // Nueva pantalla
 
 // Pantallas de Configuración (que no aparecerán en el Drawer)
 import LanguageScreen from './components/LanguageScreen';
@@ -48,7 +47,6 @@ type RootStackParamList = {
   Notificaation: undefined;
 };
 
-
 const App: React.FC = () => {
   // Cargar la fuente usando useFonts
   const [fontsLoaded] = useFonts({
@@ -58,10 +56,6 @@ const App: React.FC = () => {
   // Si las fuentes no están cargadas, mostrar una pantalla de carga
   if (!fontsLoaded) {
     return <ActivityIndicator size="large" color="#1D3557" />;
-  }
-
-  if (!fontsLoaded) {
-    return <ActivityIndicator />;
   }
 
   // Creamos el Stack para Login y Register (fuera del Drawer)
@@ -136,6 +130,16 @@ const App: React.FC = () => {
         options={{
           drawerIcon: ({ color, size }) => (
             <FontAwesome name="user" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* Nueva pantalla de Información de Nutrición */}
+      <Drawer.Screen
+        name="Información de Nutrición"
+        component={NutritionInfoScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <FontAwesome name="info-circle" size={size} color={color} />
           ),
         }}
       />
@@ -218,11 +222,10 @@ const App: React.FC = () => {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-          name="NotificationScreen"
-          component={NotificationScreen}
-          options={{ headerShown: false }}
+            name="NotificationScreen"
+            component={NotificationScreen}
+            options={{ headerShown: false }}
           />
-
         </Stack.Navigator>
       </SafeAreaView>
     </NavigationContainer>
