@@ -1,12 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing'; // Para abrir el PDF
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
 import io from 'socket.io-client';
 const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
+  const [mediciones, setMediciones] = useState([]); // Estado para almacenar las mediciones
+
+  // Datos de ejemplo para las mediciones
+  const datosMediciones = [
+    { hora: '08:00', valor: 120, tipo: 'Diaria' },
+    { hora: '12:00', valor: 110, tipo: 'Diaria' },
+    { hora: '18:00', valor: 130, tipo: 'Diaria' },
+    { hora: '22:00', valor: 100, tipo: 'Diaria' },
+  ];
+
+  useEffect(() => {
+    // Simular la carga de mediciones
+    setMediciones(datosMediciones);
+  }, []);
+
+  // Función para generar el PDF
+  const generatePDF = async () => {
+    try {
+      // Crear el contenido HTML del PDF
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #1D3557; text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+              th { background-color: #f0faf8; }
+              .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #666; }
+            </style>
+          </head>
+          <body>
+            <h1>Reporte de Medición de Glucosa</h1>
+            <table>
+              <tr>
+                <th>Hora</th>
+                <th>Valor (mg/dl)</th>
+                <th>Tipo</th>
+              </tr>
+              ${mediciones
+                .map(
+                  (medicion) => `
+                <tr>
+                  <td>${medicion.hora}</td>
+                  <td>${medicion.valor}</td>
+                  <td>${medicion.tipo}</td>
+                </tr>
+              `
+                )
+                .join('')}
+            </table>
+            <div class="footer">
+              Reporte generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Generar el PDF
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+
+      // Notificar al usuario
+      Alert.alert('Éxito', 'El PDF se ha generado correctamente.', [
+        {
+          text: 'Abrir PDF',
+          onPress: () => Sharing.shareAsync(uri), // Abrir el PDF
+        },
+        {
+          text: 'OK',
+          style: 'cancel',
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo generar el PDF');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -14,7 +93,7 @@ const ReporteScreen = ({ navigation }) => {
         <FontAwesome name="arrow-left" size={24} color="#e53945" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.downloadButton} onPress={() => alert('Se descargó el reporte correctamente')}>
+      <TouchableOpacity style={styles.downloadButton} onPress={generatePDF}>
         <FontAwesome name="download" size={30} color="#e53945" />
       </TouchableOpacity>
 
@@ -43,28 +122,24 @@ const ReporteScreen = ({ navigation }) => {
 const MedicionGlucosa = () => {
   const [glucoseLevel, setGlucoseLevel] = useState('-');
   const [lastMeasurementTime, setLastMeasurementTime] = useState(null);
-  const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null); 
+  const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null);
 
   useEffect(() => {
-    // Aquí escuchamos el evento 'glucoseMeasurement' desde el servidor para obtener el valor de glucosa real
+    // Escuchar el evento 'glucoseUpdate' desde el servidor
     socket.on('glucoseUpdate', (newGlucoseValue) => {
       setGlucoseLevel(newGlucoseValue.toString());
-      const currentTime = new Date().toLocaleString(); 
-       // Get the current timestamp.
+      const currentTime = new Date().toLocaleString();
       setLastMeasurementTime(currentTime);
-      // Verificar si el nivel de glucosa es diferente al último procesado
       const newGlucoseLevel = parseInt(newGlucoseValue);
       if (newGlucoseLevel !== lastGlucoseLevel) {
-          setLastGlucoseLevel(newGlucoseLevel); // Actualizar el último nivel de glucosa procesado
-          
+        setLastGlucoseLevel(newGlucoseLevel);
       }
-  });
-    // Cleanup: cuando el componente se desmonta, dejamos de escuchar el evento.
+    });
+
     return () => {
       socket.off('glucoseUpdate');
     };
   }, []);
-
 
   const getGlucoseColor = (level) => {
     if (level < 70) return '#6FB5E1';
@@ -79,8 +154,8 @@ const MedicionGlucosa = () => {
         <Text style={styles.circleText}>{glucoseLevel}</Text>
         <Text style={styles.unitText}>mg/dl</Text>
       </View>
-      <Text style={styles.lastMeasurementText}>Última medicion: {lastMeasurementTime}</Text>
-      
+      <Text style={styles.lastMeasurementText}>Última medición: {lastMeasurementTime}</Text>
+
       <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
 
       <View style={styles.previousMeasurements}>
@@ -89,8 +164,9 @@ const MedicionGlucosa = () => {
         <MeasurementCard title="Trimestral" />
         <MeasurementCard title="Anual" />
       </View>
-            {/* Leyenda de colores al final */}
-            <View style={styles.legendContainer}>
+
+      {/* Leyenda de colores */}
+      <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#50E055' }]} />
           <Text style={styles.legendText}>Normal (70 - 110 mg/dl)</Text>
@@ -112,18 +188,15 @@ const MedicionGlucosa = () => {
   );
 };
 
-
-
 const RegistroReporte = () => {
   const [normalPrecautionPercentage, setNormalPrecautionPercentage] = useState(0);
   const [hyperglycemiaPercentage, setHyperglycemiaPercentage] = useState(0);
   const [hypoglycemiaPercentage, setHypoglycemiaPercentage] = useState(0);
 
   useEffect(() => {
-    // Generar dos números aleatorios enteros que sumen hasta 100
-    const normalPrecaution = Math.floor(Math.random() * 100); // 0 a 99
-    const hyperglycemia = Math.floor(Math.random() * (100 - normalPrecaution)); // Hasta lo que queda para 100
-    const hypoglycemia = 100 - normalPrecaution - hyperglycemia; // Asegurar que la suma sea 100
+    const normalPrecaution = Math.floor(Math.random() * 100);
+    const hyperglycemia = Math.floor(Math.random() * (100 - normalPrecaution));
+    const hypoglycemia = 100 - normalPrecaution - hyperglycemia;
 
     setNormalPrecautionPercentage(normalPrecaution);
     setHyperglycemiaPercentage(hyperglycemia);
@@ -132,18 +205,18 @@ const RegistroReporte = () => {
 
   const glucoseLevels = [70, 50, 90, 120, 80, 40, 120, 55, 75, 100, 85, 95, 65, 30];
   const histogramData = glucoseLevels.map(level => {
-    if (level < 70) return '#6FB5E1'; // Hipoglucemia
-    if (level >= 70 && level <= 90) return '#50E055'; // Normal y Precaución
-    if (level > 110) return '#E53945'; // Hiperglucemia
-    return '#F0F05F'; // Otro rango
+    if (level < 70) return '#6FB5E1';
+    if (level >= 70 && level <= 90) return '#50E055';
+    if (level > 110) return '#E53945';
+    return '#F0F05F';
   });
 
   return (
     <View style={styles.chartContainer}>
       <View style={styles.horizontalCharts}>
-        <CustomCircle title={"Normal y \n Precaución"} percentage={normalPrecautionPercentage/100} color="#50E055" />
-        <CustomCircle title={"\nHiperglucemia"} percentage={hyperglycemiaPercentage/100} color="#E53945" />
-        <CustomCircle title={"\nHipoglucemia"} percentage={hypoglycemiaPercentage/100} color="#6FB5E1" />
+        <CustomCircle title={"Normal y \n Precaución"} percentage={normalPrecautionPercentage / 100} color="#50E055" />
+        <CustomCircle title={"\nHiperglucemia"} percentage={hyperglycemiaPercentage / 100} color="#E53945" />
+        <CustomCircle title={"\nHipoglucemia"} percentage={hypoglycemiaPercentage / 100} color="#6FB5E1" />
       </View>
 
       <Text style={styles.analysisTitle}>Análisis del Reporte</Text>
@@ -164,7 +237,6 @@ const RegistroReporte = () => {
 
       <Text style={styles.contactsTitle}>Contactos Notificados</Text>
       <View style={styles.line} />
-      {/* Lista de contactos con imagen de perfil por defecto */}
       <View style={styles.contactsContainer}>
         <Image source={DefaultProfileImage} style={styles.contactImage} />
         <Text style={styles.contactName}>Maria Mercedes</Text>
@@ -184,8 +256,7 @@ const RegistroReporte = () => {
   );
 };
 
-
-// Componente de círculo personalizado para mostrar porcentaje
+// Componentes adicionales y estilos
 const CustomCircle = ({ title, percentage, color }) => (
   <View style={styles.chartItem}>
     <Text style={styles.chartTitle}>{title}</Text>
@@ -195,7 +266,6 @@ const CustomCircle = ({ title, percentage, color }) => (
   </View>
 );
 
-// Componente para las tarjetas de medición (Semanal, Mensual, Trimestral, Anual)
 const MeasurementCard = ({ title }) => {
   const [normal, precaucion, hipo, hiper] = generateRandomPercentages();
 
@@ -219,18 +289,13 @@ const generateRandomPercentages = () => {
   const normal = parseFloat(((randomNumbers[0] / total) * 100).toFixed(2));
   const precaucion = parseFloat(((randomNumbers[1] / total) * 100).toFixed(2));
   const hipo = parseFloat(((randomNumbers[2] / total) * 100).toFixed(2));
-  const hiper = parseFloat((100 - normal - precaucion - hipo).toFixed(2)); // Ajusta el último valor para que sumen 100
+  const hiper = parseFloat((100 - normal - precaucion - hipo).toFixed(2));
 
   return [normal, precaucion, hipo, hiper];
 };
 
-// Estilos
+// Estilos (igual que antes)
 const styles = StyleSheet.create({
-  glucoseTextStyle: {
-    fontSize: 24,
-    color: '#1D3557',
-    fontWeight: 'bold',
-  },
   container: {
     flex: 1,
     paddingTop: 50,
@@ -440,6 +505,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
 
 export default ReporteScreen;

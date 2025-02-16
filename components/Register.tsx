@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, TextInput, Button, StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
+import { SafeAreaView, Text, TextInput, StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';  // Importar Picker
+import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = ({ navigation }) => {
   const [form, setForm] = useState({
     nombre: '',
-    apellidos: '', // Campo de apellidos
+    apellidos: '',
     correo: '',
     dia: '',
     mes: '',
     anio: '',
     enfermedad: '',
     password: '',
+    tipo_usuario: 'paciente', // Valor por defecto
   });
 
   const handleChange = (field, value) => {
@@ -24,27 +25,29 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
-    const { nombre, apellidos, correo, dia, mes, anio, enfermedad, password } = form;
-  
+    const { nombre, apellidos, correo, dia, mes, anio, enfermedad, password, tipo_usuario } = form;
+
     // Validar que todos los campos estén completos
     if (!nombre || !apellidos || !correo || !dia || !mes || !anio || !enfermedad || !password) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
       return;
     }
-  
-    // Almacenar datos del usuario localmente
+
+    // Aquí podrías enviar el campo "tipo_usuario" al servidor si es necesario
+    // Por ahora lo almacenamos localmente
     try {
-      await AsyncStorage.setItem('userName', nombre); // Guardar el nombre del usuario
-      await AsyncStorage.setItem('userLastName', apellidos); // Guardar el apellido
+      await AsyncStorage.setItem('userName', nombre);
+      await AsyncStorage.setItem('userLastName', apellidos);
       await AsyncStorage.setItem('userEmail', correo);
       await AsyncStorage.setItem('userPassword', password);
+      await AsyncStorage.setItem('userType', tipo_usuario);
       Alert.alert('Cuenta creada con éxito');
       navigation.navigate('Login');
     } catch (error) {
       Alert.alert('Error', 'Ocurrió un error al registrar tu cuenta.');
     }
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Botón de regreso y título */}
@@ -64,7 +67,7 @@ const RegisterScreen = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Apellidos *" // Campo de apellidos
+        placeholder="Apellidos *"
         value={form.apellidos}
         onChangeText={(text) => handleChange('apellidos', text)}
       />
@@ -123,6 +126,17 @@ const RegisterScreen = ({ navigation }) => {
         secureTextEntry={true}
       />
 
+      {/* Botón para cambiar tipo de usuario a "medico" */}
+      <View style={styles.userTypeContainer}>
+        <Text style={styles.userTypeText}>Tipo de usuario: {form.tipo_usuario}</Text>
+        <TouchableOpacity
+          style={styles.medicoButton}
+          onPress={() => handleChange('tipo_usuario', 'medico')}
+        >
+          <Text style={styles.medicoButtonText}>Medico</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Botones de cancelar y siguiente */}
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
@@ -145,22 +159,19 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center', // Alinear ícono de retroceso y título en el centro vertical
+    alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
     paddingHorizontal: 10,
     marginBottom: 80,
   },
-  backButton: {
-    marginRight: 10,
-  },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    flex: 1, // Esto asegura que el título se centre en el espacio disponible
+    flex: 1,
     color: '#1D3557',
-    fontFamily: 'Inder_400Regular', // Aplicar fuente Inder
+    fontFamily: 'Inder_400Regular',
   },
   input: {
     height: 50,
@@ -170,7 +181,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F9F9F9',
-    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los inputs
+    fontFamily: 'Inder_400Regular',
   },
   dateRow: {
     flexDirection: 'row',
@@ -189,7 +200,27 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    fontFamily: 'Inder_400Regular', // Aplicar la fuente a Picker
+    fontFamily: 'Inder_400Regular',
+  },
+  userTypeContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  userTypeText: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontFamily: 'Inder_400Regular',
+  },
+  medicoButton: {
+    backgroundColor: '#457B9D',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  medicoButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Inder_400Regular',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -214,11 +245,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    //fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'Inder_400Regular', // Aplicar la fuente a los botones
+    fontFamily: 'Inder_400Regular',
   },
 });
 
 export default RegisterScreen;
-
