@@ -16,6 +16,8 @@ import AddContactScreen from './components/AddContactScreen';
 import ProfileScreen from './components/ProfileScreen';
 import NotificationScreen from './components/NotificationScreen';
 import NutritionInfoScreen from './components/NutritionInfoScreen'; // Nueva pantalla
+import DoctorHomeScreen from './components/MedicoMenu';//Pantalla Medico Menu
+import DetallePacienteScreen from './components/DetallePacienteScreen';//Pantalla Detalle Paciente
 
 // Pantallas de Configuración (que no aparecerán en el Drawer)
 import LanguageScreen from './components/LanguageScreen';
@@ -146,6 +148,49 @@ const App: React.FC = () => {
     </Drawer.Navigator>
   );
 
+  // Después del DrawerNavigator existente, agrega:
+const DoctorDrawerNavigator = () => (
+  <Drawer.Navigator
+    initialRouteName="DoctorHome"
+    screenOptions={{
+      headerShown: false,
+      drawerStyle: {
+        backgroundColor: '#fff',
+        width: 250,
+      },
+      drawerActiveTintColor: '#1D3557',
+      drawerInactiveTintColor: '#808080',
+      drawerLabelStyle: {
+        fontFamily: 'Inder_400Regular',
+        fontSize: 16,
+      },
+      drawerItemStyle: {
+        marginVertical: 5,
+      },
+    }}
+  >
+    <Drawer.Screen
+      name="Inicio Médico"
+      component={DoctorHomeScreen}
+      options={{
+        drawerIcon: ({ color, size }) => (
+          <FontAwesome name="stethoscope" size={size} color={color} />
+        ),
+      }}
+    />
+    <Drawer.Screen
+      name="Reportes Médicos"
+      component={ReporteScreen}
+      options={{
+        drawerIcon: ({ color, size }) => (
+          <FontAwesome name="file-text-o" size={size} color={color} />
+        ),
+      }}
+    />
+    {/* Agrega más pantallas específicas para médicos si es necesario */}
+  </Drawer.Navigator>
+);
+
   return (
     <NavigationContainer>
       <SafeAreaView style={{ flex: 1 }}>
@@ -224,6 +269,16 @@ const App: React.FC = () => {
           <Stack.Screen
             name="NotificationScreen"
             component={NotificationScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="DoctorMain"
+            component={DoctorHomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="DetallePaciente"
+            component={DetallePacienteScreen}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
