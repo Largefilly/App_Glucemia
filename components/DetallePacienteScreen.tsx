@@ -2,6 +2,7 @@ import React from 'react';
 import { SafeAreaView, ScrollView, Text, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
 
 const DetallePacienteScreen = ({ route }) => {
   const { paciente } = route.params;
@@ -16,6 +17,8 @@ const DetallePacienteScreen = ({ route }) => {
       strokeWidth: 2
     }]
   };
+
+  const screenWidth = Dimensions.get('window').width;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,8 +39,8 @@ const DetallePacienteScreen = ({ route }) => {
           <Text style={styles.sectionTitle}>Últimas Mediciones</Text>
           <LineChart
             data={chartData}
-            width={350}
-            height={220}
+            width={screenWidth * 0.9}
+            height={200}
             yAxisSuffix=" mg/dl"
             chartConfig={{
               backgroundColor: '#fff',
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingBottom: 30,
   },
   backButton: {
@@ -120,7 +123,7 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 10,
-    paddingRight: 30,
+    paddingRight: 80,
   },
   historialItem: {
     flexDirection: 'row',
@@ -143,6 +146,7 @@ const styles = StyleSheet.create({
     color: '#E53945',
     fontWeight: 'bold',
   },
+  
 });
 
 export default DetallePacienteScreen;
