@@ -4,7 +4,7 @@ import { io } from 'socket.io-client'; // Importar socket.io-client
 
 
 // Configura la URL base de tu backend
-const API_BASE_URL = 'http://192.168.18.6:3000/api';
+const API_BASE_URL = 'https://glucollerbackv2-aagbhme4fee4cmed.brazilsouth-01.azurewebsites.net/api';
 // Inicializar socket.io
 export const socket = io(API_BASE_URL); // Asegúrate de que el backend tenga WebSockets activos
 

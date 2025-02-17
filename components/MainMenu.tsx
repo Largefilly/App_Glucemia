@@ -11,7 +11,7 @@ import { Audio } from 'expo-av';
 
 
 // URL del backend con WebSockets
-const SOCKET_URL = 'http://192.168.18.6:3000';
+const SOCKET_URL = 'https://glucollerbackv2-aagbhme4fee4cmed.brazilsouth-01.azurewebsites.net';
 const socket = io(SOCKET_URL);
 
 // Configuración para manejar notificaciones en segundo plano
