@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, KeyboardAvo
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Definir los tipos del Stack Navigator
 type RootStackParamList = {
@@ -16,25 +17,21 @@ type AddContactScreenNavigationProp = StackNavigationProp<
 
 interface Props {
   navigation: AddContactScreenNavigationProp;
-  route: any;
 }
 
-const AddContactScreen: React.FC<Props> = ({ navigation, route }) => {
+const AddContactScreen: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [relationship, setRelationship] = useState('');
-  const [description, setDescription] = useState('');
 
-  const { agregarContacto } = route.params;
-
-  // Oculta el header al cargar la pantalla
+  // Ocultar el header al cargar la pantalla
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
   // Validación del formulario
   const validateForm = () => {
-    if (!name || !email || !relationship ) {
+    if (!name || !email || !relationship) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
       return false;
     }
@@ -46,19 +43,36 @@ const AddContactScreen: React.FC<Props> = ({ navigation, route }) => {
     return true;
   };
 
-  // Manejar el guardado de contacto
-  const handleSave = () => {
+  // Manejar el guardado del contacto en AsyncStorage
+  const handleSave = async () => {
     if (validateForm()) {
-      const nuevoContacto = { name, email, relationship }; // Crear nuevo contacto
+      const nuevoContacto = { 
+        name, 
+        email, 
+        relationship,
+        date: new Date().toLocaleString() // Guardamos la fecha y hora de registro
+      };
 
-      agregarContacto(nuevoContacto); // Pasar el nuevo contacto a la función pasada por parámetros
+      try {
+        // Recuperar los contactos guardados anteriormente
+        const storedContacts = await AsyncStorage.getItem('contacts');
+        let contacts = [];
+        if (storedContacts !== null) {
+          contacts = JSON.parse(storedContacts);
+        }
+        // Agregar el nuevo contacto
+        contacts.push(nuevoContacto);
+        // Guardar nuevamente el array actualizado
+        await AsyncStorage.setItem('contacts', JSON.stringify(contacts));
+      } catch (error) {
+        console.error('Error al guardar el contacto:', error);
+      }
 
-      // Limpiar los campos
+      // Limpiar los campos y volver a la pantalla anterior
       setName('');
       setEmail('');
       setRelationship('');
-
-      navigation.goBack(); // Volver a la pantalla anterior después de guardar
+      navigation.goBack();
     }
   };
 
@@ -124,7 +138,6 @@ const AddContactScreen: React.FC<Props> = ({ navigation, route }) => {
               </TouchableOpacity>
             ) : null}
           </View>
-
         </View>
 
         {/* Botones en la parte inferior */}
@@ -145,7 +158,6 @@ const AddContactScreen: React.FC<Props> = ({ navigation, route }) => {
   );
 };
 
-// Estilos mejorados
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -161,7 +173,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 22,
     zIndex: 3,
-    fontFamily: 'Inder_400Regular',
   },
   title: {
     fontSize: 30,
@@ -169,7 +180,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     top: -22,
     marginBottom: 30,
-    fontFamily: 'Inder_400Regular',
     color: '#1D3557',
   },
   formContainer: {
@@ -189,7 +199,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontFamily: 'Inder_400Regular',
   },
   iconRight: {
     marginLeft: 10,
@@ -217,7 +226,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'Inder_400Regular',
   },
 });
 
