@@ -35,6 +35,7 @@ const HomeScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null); 
 
+
     // Solicitar permisos de notificación
     useEffect(() => {
         const requestPermissions = async () => {
@@ -52,9 +53,9 @@ const HomeScreen = () => {
             try {
                 const storedNotifications = await AsyncStorage.getItem('notifications');
                 if (storedNotifications) {
-                    setNotifications(JSON.parse(storedNotifications));
-                    const unreadCount = JSON.parse(storedNotifications).filter(notif => !notif.read).length;
-                    setNotificationCount(unreadCount);
+                    const parsedNotifications = JSON.parse(storedNotifications);
+                    setNotifications(parsedNotifications);
+                    setNotificationCount(parsedNotifications.filter((notif) => !notif.read).length);
                 }
             } catch (error) {
                 console.error('Error al cargar las notificaciones almacenadas:', error);
@@ -62,7 +63,7 @@ const HomeScreen = () => {
         };
     
         loadStoredNotifications();
-    }, []);
+    }, [isFocused]); // Se ejecuta cuando la pantalla gana el foco
     // Cargar datos del perfil cuando la pantalla gana el foco
     useEffect(() => {
         const loadProfileDataAndSubscribeToGlucose = async () => {
@@ -132,9 +133,18 @@ const HomeScreen = () => {
             read: false,
         };
     
-        setNotifications((prev) => [newNotification, ...prev]); // Agregar al historial
-        setNotificationCount((prevCount) => prevCount + 1); // Incrementar el contador de no leídas
+        setNotifications((prev) => {
+            const updatedNotifications = [newNotification, ...prev];
+            
+            // Guardar en AsyncStorage
+            AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications))
+                .catch(error => console.error('Error guardando notificaciones:', error));
     
+            return updatedNotifications;
+        });
+    
+        setNotificationCount((prevCount) => prevCount + 1)
+
         // Función para reproducir el sonido de la notificación
         const playSound = async (times, glucoseValue, level) => {
             try {
@@ -200,16 +210,22 @@ const HomeScreen = () => {
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
 
-    const handleNotificationPress = () => {
+    const handleNotificationPress = async () => {
         setModalVisible(true);
-        // Marcar todas las notificaciones como leídas
+    
         const updatedNotifications = notifications.map((notification) => ({
             ...notification,
             read: true,
         }));
+    
         setNotifications(updatedNotifications);
-        setNotificationCount(0); // Reiniciar el contador de no leídas
+        setNotificationCount(0);
+    
+        // Guardar en AsyncStorage
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications))
+            .catch(error => console.error('Error al actualizar las notificaciones:', error));
     };
+    
 
     const handleCloseModal = () => {
         setModalVisible(false); // Cerrar el modal
@@ -220,9 +236,10 @@ const HomeScreen = () => {
         const updatedNotifications = notifications.filter(notification => notification.id !== id);
         setNotifications(updatedNotifications);
         setNotificationCount(updatedNotifications.length);
-        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications)).catch((error) => {
-            console.error('Error al eliminar la notificación:', error);
-        });
+    
+        // Guardar en AsyncStorage
+        AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications))
+            .catch((error) => console.error('Error al eliminar la notificación:', error));
     };
 
     const handleNotificationRead = (id) => {
