@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
-
+import { useFocusEffect } from '@react-navigation/native';
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
 
 import io from 'socket.io-client';
@@ -343,8 +343,10 @@ const RegistroReporte = () => {
   const [normalPrecautionPercentage, setNormalPrecautionPercentage] = useState(0);
   const [hyperglycemiaPercentage, setHyperglycemiaPercentage] = useState(0);
   const [hypoglycemiaPercentage, setHypoglycemiaPercentage] = useState(0);
+  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
+    // Generar porcentajes aleatorios para el reporte
     const normalPrecaution = Math.floor(Math.random() * 100);
     const hyperglycemia = Math.floor(Math.random() * (100 - normalPrecaution));
     const hypoglycemia = 100 - normalPrecaution - hyperglycemia;
@@ -353,6 +355,24 @@ const RegistroReporte = () => {
     setHyperglycemiaPercentage(hyperglycemia);
     setHypoglycemiaPercentage(hypoglycemia);
   }, []);
+
+  // Recargar los contactos cada vez que la pantalla esté en foco
+  useFocusEffect(
+    useCallback(() => {
+      const loadContacts = async () => {
+        try {
+          const storedContacts = await AsyncStorage.getItem('contacts');
+          if (storedContacts !== null) {
+            setContacts(JSON.parse(storedContacts));
+          }
+        } catch (error) {
+          console.error("Error al cargar los contactos:", error);
+        }
+      };
+
+      loadContacts();
+    }, [])
+  );
 
   const glucoseLevels = [70, 50, 90, 120, 80, 40, 120, 55, 75, 100, 85, 95, 65, 30];
   const histogramData = glucoseLevels.map(level => {
@@ -388,21 +408,20 @@ const RegistroReporte = () => {
 
       <Text style={styles.contactsTitle}>Contactos Notificados</Text>
       <View style={styles.line} />
-      <View style={styles.contactsContainer}>
-        <Image source={DefaultProfileImage} style={styles.contactImage} />
-        <Text style={styles.contactName}>Maria Mercedes</Text>
-        <Text style={styles.contactDate}>17/10 | 20:00</Text>
-      </View>
-      <View style={styles.contactsContainer}>
-        <Image source={DefaultProfileImage} style={styles.contactImage} />
-        <Text style={styles.contactName}>Nicki Nicole</Text>
-        <Text style={styles.contactDate}>17/10 | 20:30</Text>
-      </View>
-      <View style={styles.contactsContainer}>
-        <Image source={DefaultProfileImage} style={styles.contactImage} />
-        <Text style={styles.contactName}>Bruno Mars</Text>
-        <Text style={styles.contactDate}>17/10 | 21:00</Text>
-      </View>
+      {/* La lista de contactos se envuelve en un ScrollView para que sea scrollable */}
+      <ScrollView style={styles.contactsScrollView}>
+        {contacts && contacts.length > 0 ? (
+          contacts.map((contact, index) => (
+            <View style={styles.contactsContainer} key={index}>
+              <Image source={DefaultProfileImage} style={styles.contactImage} />
+              <Text style={styles.contactName}>{contact.name}</Text>
+              <Text style={styles.contactDate}>{contact.date}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noContactsText}>No hay contactos notificados</Text>
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -649,6 +668,16 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noContactsText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  contactsScrollView: {
+    maxHeight: 200, // Ajusta este valor según la cantidad de espacio que desees asignar
+    width: '100%',
   },
 });
 
