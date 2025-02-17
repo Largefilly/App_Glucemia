@@ -5,10 +5,12 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
 
 import io from 'socket.io-client';
-const socket = io("http://192.168.18.6:3000");
+const socket = io("http://192.168.1.4:3000");
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
@@ -239,50 +241,72 @@ const ReporteScreen = ({ navigation }) => {
 };
 
 const MedicionGlucosa = () => {
-  const [glucoseLevel, setGlucoseLevel] = useState('-');
-  const [lastMeasurementTime, setLastMeasurementTime] = useState(null);
-  const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null);
+  const [glucoseLevel, setGlucoseLevel] = useState<string | null>('-');
+  const [lastMeasurementTime, setLastMeasurementTime] = useState<string | null>(null);
+  const [lastGlucoseLevel, setLastGlucoseLevel] = useState<number | null>(null);
 
+  // Cargar la última medición cuando el componente se monta
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedGlucoseLevel = await AsyncStorage.getItem('lastGlucoseLevel');
+        const storedMeasurementTime = await AsyncStorage.getItem('lastMeasurementTime');
+
+        if (storedGlucoseLevel !== null && storedMeasurementTime !== null) {
+          setGlucoseLevel(storedGlucoseLevel);
+          setLastMeasurementTime(storedMeasurementTime);
+        }
+      } catch (error) {
+        console.error('Error al cargar los datos persistentes:', error);
+      }
+    };
+
+    loadData();
+
     // Escuchar el evento 'glucoseUpdate' desde el servidor
     socket.on('glucoseUpdate', (data) => {
       console.log("Datos recibidos del socket:", JSON.stringify(data, null, 2));
-  
-      // Extraer correctamente el valor de glucosa desde el objeto recibido
+
       const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
-  
+
       if (typeof newGlucoseValue === 'number') {
-        setGlucoseLevel(newGlucoseValue.toString()); // Asegurar que sea string para el estado
+        const newGlucoseLevel = newGlucoseValue.toString();
+        setGlucoseLevel(newGlucoseLevel);
         const currentTime = new Date().toLocaleString();
         setLastMeasurementTime(currentTime);
-  
+
         if (newGlucoseValue !== lastGlucoseLevel) {
           setLastGlucoseLevel(newGlucoseValue);
         }
+
+        // Guardar los nuevos valores en AsyncStorage
+        AsyncStorage.setItem('lastGlucoseLevel', newGlucoseLevel);
+        AsyncStorage.setItem('lastMeasurementTime', currentTime);
       } else {
         console.error("El valor de glucosa recibido no es válido:", data);
       }
     });
-  
+
     return () => {
       socket.off('glucoseUpdate');
     };
-  }, []);
-  
-  const getGlucoseColor = (level) => {
-    if (level < 70) return '#6FB5E1';
-    if (level >= 70 && level <= 110) return '#50E055';
-    if (level > 110 && level <= 140) return '#F0F05F';
+  }, [lastGlucoseLevel]); // Dependencia en lastGlucoseLevel para ejecutar cada vez que cambia
+
+  const getGlucoseColor = (level: string) => {
+    const numericLevel = Number(level);
+    if (numericLevel < 70) return '#6FB5E1';
+    if (numericLevel >= 70 && numericLevel <= 110) return '#50E055';
+    if (numericLevel > 110 && numericLevel <= 140) return '#F0F05F';
     return '#E53945';
   };
 
   return (
     <View style={styles.glucoseContainer}>
-      <View style={[styles.circleContainer, { borderColor: getGlucoseColor(glucoseLevel) }]}>
+      <View style={[styles.circleContainer, { borderColor: getGlucoseColor(glucoseLevel || '0') }]}>
         <Text style={styles.circleText}>{glucoseLevel}</Text>
         <Text style={styles.unitText}>mg/dl</Text>
       </View>
-      <Text style={styles.lastMeasurementText}>Última medición: {lastMeasurementTime}</Text>
+      <Text style={styles.lastMeasurementText}>Última medición: {lastMeasurementTime || 'No disponible'}</Text>
 
       <Text style={styles.sectionTitle}>Mediciones anteriores</Text>
       <View style={styles.previousMeasurements}>
