@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, PermissionsAndroid } from 'react-native'; // Importa PermissionsAndroid
 import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -28,6 +28,32 @@ const ReporteScreen = ({ navigation }) => {
     // Simular la carga de mediciones
     setMediciones(datosMediciones);
   }, []);
+
+  // Función para solicitar permisos de almacenamiento en Android
+  const requestStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Permiso de Almacenamiento',
+          message: 'La aplicación necesita acceso al almacenamiento para guardar el PDF.',
+          buttonNeutral: 'Preguntar después',
+          buttonNegative: 'Cancelar',
+          buttonPositive: 'OK',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Permiso de almacenamiento concedido');
+        return true;
+      } else {
+        console.log('Permiso de almacenamiento denegado');
+        return false;
+      }
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
 
   // Función para generar un gráfico SVG a partir de las mediciones
   const generateChartSVG = (mediciones) => {
@@ -101,6 +127,13 @@ const ReporteScreen = ({ navigation }) => {
   // Función para generar el PDF con HTML embellecido, datos del paciente y gráfico SVG
   const generatePDF = async () => {
     try {
+      // Solicitar permisos de almacenamiento
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert('Error', 'Se necesitan permisos de almacenamiento para guardar el PDF.');
+        return;
+      }
+
       // Datos del paciente (estos valores pueden venir de un estado, props o de la base de datos)
       const nombreCompleto = "Juan Pérez";
       const edad = 35;
