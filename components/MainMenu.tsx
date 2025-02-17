@@ -6,11 +6,13 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { Audio } from 'expo-av';
 
 
-const socket = io("http://192.168.18.6:3000");
+// URL del backend con WebSockets
+const SOCKET_URL = 'http://192.168.18.6:3000';
+const socket = io(SOCKET_URL);
 
 // Configuración para manejar notificaciones en segundo plano
 Notifications.setNotificationHandler({
@@ -64,55 +66,59 @@ const HomeScreen = () => {
     // Cargar datos del perfil cuando la pantalla gana el foco
     useEffect(() => {
         const loadProfileDataAndSubscribeToGlucose = async () => {
-            try {
-                // Cargar nombre de usuario desde AsyncStorage
-                const name = await AsyncStorage.getItem('userName');
-                if (name) {
-                    const firstName = name.split(' ')[0];
-                    setUserName(firstName);
-                }
-    
-                // Cargar imagen de perfil desde AsyncStorage
-                const savedImage = await AsyncStorage.getItem('profileImage');
-                if (savedImage) {
-                    setProfileImage({ uri: savedImage });
-                }
-            } catch (error) {
-                console.log('Error cargando la imagen o nombre del usuario', error);
+          try {
+            const name = await AsyncStorage.getItem('userName');
+            if (name) setUserName(name.split(' ')[0]); // Extraer solo el primer nombre
+      
+            const savedImage = await AsyncStorage.getItem('profileImage');
+            if (savedImage) setProfileImage({ uri: savedImage });
+      
+            const storedNotifications = await AsyncStorage.getItem('notifications');
+            if (storedNotifications) {
+              const parsedNotifications = JSON.parse(storedNotifications);
+              setNotifications(parsedNotifications);
+              setNotificationCount(parsedNotifications.filter((notif) => !notif.read).length);
             }
-    
-            // Suscribirse a las actualizaciones de glucosa del socket
-            socket.on('glucoseUpdate', (newGlucoseValue) => {
-                setGlucoseLevel(newGlucoseValue.toString());
-                setLastMeasurementTime(getCurrentTime());
-                setNotificationCount((prevCount) => prevCount + 1);
-
-                // Verificar si el nivel de glucosa es diferente al último procesado
-                const newGlucoseLevel = parseInt(newGlucoseValue);
-                if (newGlucoseLevel !== lastGlucoseLevel) {
-                    setLastGlucoseLevel(newGlucoseLevel); // Actualizar el último nivel de glucosa procesado
-                    
-                    // Lógica para enviar notificaciones basadas en el nivel de glucosa
-                    if (newGlucoseLevel >= 131 && newGlucoseLevel <= 179) {
-                        sendNotification("Precaución ⚠️", newGlucoseLevel);
-                    } else if (newGlucoseLevel >= 180) {
-                        sendNotification("Hiperglucemia 🚫", newGlucoseLevel);
-                    } else if (newGlucoseLevel < 70) {
-                        sendNotification("Hipoglucemia 🚫", newGlucoseLevel);
-                    } else if (newGlucoseLevel >= 70 && newGlucoseLevel <= 130) {
-                        sendNotification("Normal ✅", newGlucoseLevel);
-                    }
-                }
-            });
+          } catch (error) {
+            console.error('Error cargando datos del perfil:', error);
+          }
+      
+          // Suscribirse a las actualizaciones de glucosa del socket
+          socket.on('glucoseUpdate', (data: any) => {
+            console.log('Datos recibidos del socket:', JSON.stringify(data, null, 2));
+      
+            const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
+            if (typeof newGlucoseValue !== 'number') {
+              console.error('El valor de glucosa recibido no es válido:', data);
+              return;
+            }
+      
+            setGlucoseLevel(newGlucoseValue.toString());
+            setLastMeasurementTime(new Date().toLocaleTimeString());
+      
+            // Verificar si el nivel de glucosa ha cambiado antes de actualizar
+            if (newGlucoseValue !== lastGlucoseLevel) {
+              setLastGlucoseLevel(newGlucoseValue);
+              setNotificationCount((prevCount) => prevCount + 1);
+      
+              // Determinar la categoría del nivel de glucosa
+              let level = "Normal ✅";
+              if (newGlucoseValue >= 131 && newGlucoseValue <= 179) level = "Precaución ⚠️";
+              else if (newGlucoseValue >= 180) level = "Hiperglucemia 🚫";
+              else if (newGlucoseValue < 70) level = "Hipoglucemia 🚫";
+      
+              sendNotification(level, newGlucoseValue);
+            }
+          });
         };
-    
+      
         loadProfileDataAndSubscribeToGlucose();
-    
+      
         // Limpiar la suscripción del socket cuando el componente se desmonte
         return () => {
-            socket.off('glucoseUpdate');
+          socket.off('glucoseUpdate');
         };
-    }, [lastGlucoseLevel]); // Se incluye `lastGlucoseLevel` como dependencia
+      }, [isFocused, lastGlucoseLevel]); // Se incluye `lastGlucoseLevel` como dependencia
 
     const handleMenuPress = () => {
         navigation.dispatch(DrawerActions.openDrawer());

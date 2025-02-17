@@ -8,7 +8,7 @@ import { Asset } from 'expo-asset';
 const DefaultProfileImage = require('../assets/FotoPerfil.png');
 
 import io from 'socket.io-client';
-const socket = io("https://server-f3ahd9ahhybmevc8.brazilsouth-01.azurewebsites.net");
+const socket = io("http://192.168.18.6:3000");
 
 const ReporteScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
@@ -245,20 +245,30 @@ const MedicionGlucosa = () => {
 
   useEffect(() => {
     // Escuchar el evento 'glucoseUpdate' desde el servidor
-    socket.on('glucoseUpdate', (newGlucoseValue) => {
-      setGlucoseLevel(newGlucoseValue.toString());
-      const currentTime = new Date().toLocaleString();
-      setLastMeasurementTime(currentTime);
-      const newGlucoseLevel = parseInt(newGlucoseValue);
-      if (newGlucoseLevel !== lastGlucoseLevel) {
-        setLastGlucoseLevel(newGlucoseLevel);
+    socket.on('glucoseUpdate', (data) => {
+      console.log("Datos recibidos del socket:", JSON.stringify(data, null, 2));
+  
+      // Extraer correctamente el valor de glucosa desde el objeto recibido
+      const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
+  
+      if (typeof newGlucoseValue === 'number') {
+        setGlucoseLevel(newGlucoseValue.toString()); // Asegurar que sea string para el estado
+        const currentTime = new Date().toLocaleString();
+        setLastMeasurementTime(currentTime);
+  
+        if (newGlucoseValue !== lastGlucoseLevel) {
+          setLastGlucoseLevel(newGlucoseValue);
+        }
+      } else {
+        console.error("El valor de glucosa recibido no es válido:", data);
       }
     });
+  
     return () => {
       socket.off('glucoseUpdate');
     };
   }, []);
-
+  
   const getGlucoseColor = (level) => {
     if (level < 70) return '#6FB5E1';
     if (level >= 70 && level <= 110) return '#50E055';

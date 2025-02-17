@@ -10,19 +10,22 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      const data = await login(correo, contraseña); // Usa la función de login
-
+      const data = await login(correo, contraseña);
+  
       if (data.token) {
-        // Guardar el token y el tipo de usuario en AsyncStorage
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('userEmail', correo);
-        await AsyncStorage.setItem('userType', data.tipo_usuario); // Guardar el tipo de usuario
-
-        // Redirigir según el tipo de usuario
+        await AsyncStorage.setItem('userType', data.tipo_usuario);
+  
+        if (data.nombre) {
+          await AsyncStorage.setItem('userName', data.nombre); 
+          console.log("Nombre guardado en AsyncStorage:", data.nombre);  // 🔍 Agregamos un log para verificar
+        }
+  
         if (data.tipo_usuario === 'medico') {
-          navigation.navigate('DoctorMain'); // Redirige al menú del médico
+          navigation.navigate('DoctorMain');
         } else if (data.tipo_usuario === 'paciente') {
-          navigation.navigate('MainMenu'); // Redirige al menú del paciente
+          navigation.navigate('MainMenu');
         } else {
           Alert.alert('Error', 'Tipo de usuario no reconocido.');
         }
