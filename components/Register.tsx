@@ -3,6 +3,7 @@ import { SafeAreaView, Text, TextInput, StyleSheet, View, Alert, TouchableOpacit
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { register } from '../server/api';
 
 const RegisterScreen = ({ navigation }) => {
   const [form, setForm] = useState({
@@ -14,7 +15,7 @@ const RegisterScreen = ({ navigation }) => {
     anio: '',
     enfermedad: '',
     password: '',
-    tipo_usuario: 'paciente', // Valor por defecto
+    tipo_usuario: 'paciente',
   });
 
   const handleChange = (field, value) => {
@@ -26,31 +27,41 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     const { nombre, apellidos, correo, dia, mes, anio, enfermedad, password, tipo_usuario } = form;
-
-    // Validar que todos los campos estén completos
+  
     if (!nombre || !apellidos || !correo || !dia || !mes || !anio || !enfermedad || !password) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
       return;
     }
-
-    // Aquí podrías enviar el campo "tipo_usuario" al servidor si es necesario
-    // Por ahora lo almacenamos localmente
+  
+    // Unir la fecha en el formato que espera el backend
+    const fecha_nacimiento = `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  
+    // Estructurar los datos correctamente
+    const formattedData: any = {
+      nombre,
+      apellido: apellidos, // Corregir a singular
+      correo,
+      fecha_nacimiento, // Unificar fecha
+      tipo_enfermedad: enfermedad, // Corregir nombre de campo
+      contraseña: password, // Corregir nombre de campo
+    };
+  
+    // Si el usuario es médico, agregar el campo tipo_usuario
+    if (tipo_usuario === 'medico') {
+      formattedData.tipo_usuario = 'medico';
+    }
+  
     try {
-      await AsyncStorage.setItem('userName', nombre);
-      await AsyncStorage.setItem('userLastName', apellidos);
-      await AsyncStorage.setItem('userEmail', correo);
-      await AsyncStorage.setItem('userPassword', password);
-      await AsyncStorage.setItem('userType', tipo_usuario);
+      const data = await register(formattedData);
       Alert.alert('Cuenta creada con éxito');
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error al registrar tu cuenta.');
+      Alert.alert('Error', error.message || 'Ocurrió un error al registrar tu cuenta.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Botón de regreso y título */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome name="arrow-left" size={24} color="#E53945" />
@@ -58,7 +69,6 @@ const RegisterScreen = ({ navigation }) => {
         <Text style={styles.title}>Registro</Text>
       </View>
 
-      {/* Campos del formulario */}
       <TextInput
         style={styles.input}
         placeholder="Nombre *"
@@ -79,7 +89,6 @@ const RegisterScreen = ({ navigation }) => {
         keyboardType="email-address"
       />
 
-      {/* Fecha de nacimiento */}
       <View style={styles.dateRow}>
         <TextInput
           style={[styles.input, styles.dateInput]}
@@ -104,14 +113,13 @@ const RegisterScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Selector de tipo de enfermedad */}
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.enfermedad}
           onValueChange={(itemValue) => handleChange('enfermedad', itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="Tipo de enfermedad *" value="" enabled={false} /> 
+          <Picker.Item label="Tipo de enfermedad *" value="" enabled={false} />
           <Picker.Item label="Tipo 1" value="Tipo 1" />
           <Picker.Item label="Tipo 2" value="Tipo 2" />
           <Picker.Item label="Prediabetes" value="Prediabetes" />
@@ -126,7 +134,6 @@ const RegisterScreen = ({ navigation }) => {
         secureTextEntry={true}
       />
 
-      {/* Botón para cambiar tipo de usuario a "medico" */}
       <View style={styles.userTypeContainer}>
         <Text style={styles.userTypeText}>Tipo de usuario: {form.tipo_usuario}</Text>
         <TouchableOpacity
@@ -137,7 +144,6 @@ const RegisterScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Botones de cancelar y siguiente */}
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
           <Text style={styles.buttonText}>Cancelar</Text>

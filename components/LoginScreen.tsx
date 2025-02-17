@@ -2,63 +2,74 @@
 import React, { useState } from 'react';
 import { SafeAreaView, Text, TextInput, Button, StyleSheet, View, Alert,TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { login } from '../server/api';
 
 const LoginScreen = ({ navigation }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-  
-    const handleLogin = async () => {
-      try {
-        const storedEmail = await AsyncStorage.getItem('userEmail');
-        const storedPassword = await AsyncStorage.getItem('userPassword');
-  
-        if (email === storedEmail && password === storedPassword) {
-          navigation.navigate('MainMenu');
-        } else {
-          Alert.alert('Error', 'Correo o contraseña incorrectos.');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'Ocurrió un error al iniciar sesión');
-      }
-    };
+  const [correo, setEmail] = useState('');
+  const [contraseña, setPassword] = useState('');
 
-    return (
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.title}>Bienvenido a Glucoller</Text>
-        {/* Cambiar Logo */}
-          <Image source={require('../assets/logoGlucoller.png')} style={styles.logo} /> 
-    
-          <TextInput
-            style={styles.input}
-            placeholder="Correo"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
-    
-          <TouchableOpacity onPress={() => Alert.alert('Recuperar contraseña')}>
-            <Text style={styles.forgotPassword}>Te olvidaste tu contraseña</Text>
-          </TouchableOpacity>
-    
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-          </TouchableOpacity>
-    
-          <Text style={styles.orText}>o</Text>
-    
-          <TouchableOpacity style={styles.createAccountButton} onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.createAccountButtonText}>Crear una cuenta</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-      );
-    };
+  const handleLogin = async () => {
+    try {
+      const data = await login(correo, contraseña); // Usa la función de login
+
+      if (data.token) {
+        // Guardar el token y el tipo de usuario en AsyncStorage
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('userEmail', correo);
+        await AsyncStorage.setItem('userType', data.tipo_usuario); // Guardar el tipo de usuario
+
+        // Redirigir según el tipo de usuario
+        if (data.tipo_usuario === 'medico') {
+          navigation.navigate('DoctorMain'); // Redirige al menú del médico
+        } else if (data.tipo_usuario === 'paciente') {
+          navigation.navigate('MainMenu'); // Redirige al menú del paciente
+        } else {
+          Alert.alert('Error', 'Tipo de usuario no reconocido.');
+        }
+      } else {
+        Alert.alert('Error', data.message || 'Correo o contraseña incorrectos.');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Ocurrió un error al conectar con el servidor.');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Bienvenido a Glucoller</Text>
+      <Image source={require('../assets/logoGlucoller.png')} style={styles.logo} />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Correo"
+        value={correo}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        value={contraseña}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TouchableOpacity onPress={() => Alert.alert('Recuperar contraseña')}>
+        <Text style={styles.forgotPassword}>Te olvidaste tu contraseña</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.orText}>o</Text>
+
+      <TouchableOpacity style={styles.createAccountButton} onPress={() => navigation.navigate('Register')}>
+        <Text style={styles.createAccountButtonText}>Crear una cuenta</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+};
     
 
 const styles = StyleSheet.create({
