@@ -8,43 +8,37 @@ const NutritionInfoScreen = ({ navigation }) => {
 
   // Consejos de nutrición por enfermedad
   const nutritionTips = {
-    diabetesTipo1: (
-      <>
-        <Text style={styles.tipText}>1. Controla tu ingesta de carbohidratos y ajusta la dosis de insulina según sea necesario.</Text>
-        <Text style={styles.tipText}>2. Consume alimentos ricos en fibra, como verduras, frutas y granos enteros.</Text>
-        <Text style={styles.tipText}>3. Evita los alimentos procesados y altos en azúcares refinados.</Text>
-        <Text style={styles.tipText}>4. Realiza comidas pequeñas y frecuentes para mantener estables los niveles de glucosa.</Text>
-        <Text style={styles.tipText}>5. Consulta a un nutricionista para un plan personalizado.</Text>
-      </>
-    ),
-    diabetesTipo2: (
-      <>
-        <Text style={styles.tipText}>1. Limita el consumo de carbohidratos simples y opta por carbohidratos complejos.</Text>
-        <Text style={styles.tipText}>2. Incorpora proteínas magras en cada comida, como pollo, pescado o legumbres.</Text>
-        <Text style={styles.tipText}>3. Reduce el consumo de grasas saturadas y evita las grasas trans.</Text>
-        <Text style={styles.tipText}>4. Realiza actividad física regularmente para mejorar la sensibilidad a la insulina.</Text>
-        <Text style={styles.tipText}>5. Mantén un peso saludable para controlar mejor la diabetes.</Text>
-      </>
-    ),
-    prediabetes: (
-      <>
-        <Text style={styles.tipText}>1. Reduce el consumo de azúcares y carbohidratos refinados.</Text>
-        <Text style={styles.tipText}>2. Aumenta la ingesta de fibra con verduras, frutas y granos enteros.</Text>
-        <Text style={styles.tipText}>3. Realiza ejercicio físico al menos 30 minutos al día, 5 veces por semana.</Text>
-        <Text style={styles.tipText}>4. Controla tu peso y evita el sobrepeso.</Text>
-        <Text style={styles.tipText}>5. Consulta a un médico para un seguimiento regular.</Text>
-      </>
-    ),
+    diabetesTipo1: [
+      'Controla tu ingesta de carbohidratos y ajusta la dosis de insulina según sea necesario.',
+      'Consume alimentos ricos en fibra, como verduras, frutas y granos enteros.',
+      'Evita los alimentos procesados y altos en azúcares refinados.',
+      'Realiza comidas pequeñas y frecuentes para mantener estables los niveles de glucosa.',
+      'Consulta a un nutricionista para un plan personalizado.',
+    ],
+    diabetesTipo2: [
+      'Limita el consumo de carbohidratos simples y opta por carbohidratos complejos.',
+      'Incorpora proteínas magras en cada comida, como pollo, pescado o legumbres.',
+      'Reduce el consumo de grasas saturadas y evita las grasas trans.',
+      'Realiza actividad física regularmente para mejorar la sensibilidad a la insulina.',
+      'Mantén un peso saludable para controlar mejor la diabetes.',
+    ],
+    prediabetes: [
+      'Reduce el consumo de azúcares y carbohidratos refinados.',
+      'Aumenta la ingesta de fibra con verduras, frutas y granos enteros.',
+      'Realiza ejercicio físico al menos 30 minutos al día, 5 veces por semana.',
+      'Controla tu peso y evita el sobrepeso.',
+      'Consulta a un médico para un seguimiento regular.',
+    ],
   };
 
   return (
     <View style={styles.container}>
-      {/* Flecha para retroceder */}
+      {/* Botón de retroceso */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <FontAwesome name="arrow-left" size={24} color="#F24162" /> {/* Cambia el color aquí */}
+        <FontAwesome name="arrow-left" size={24} color="#F24162" />
       </TouchableOpacity>
 
-      {/* Título de la pantalla */}
+      {/* Título */}
       <Text style={styles.title}>Nutrición</Text>
 
       {/* Selector de enfermedades */}
@@ -62,7 +56,12 @@ const NutritionInfoScreen = ({ navigation }) => {
 
       {/* Consejos de nutrición */}
       <ScrollView style={styles.tipsContainer}>
-        {nutritionTips[selectedDisease]}
+        {nutritionTips[selectedDisease].map((tip, index) => (
+          <View key={index} style={styles.tipItem}>
+            {/* Asegúrate de que el texto esté dentro de <Text> */}
+            <Text style={styles.tipText}>{tip}</Text>
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
