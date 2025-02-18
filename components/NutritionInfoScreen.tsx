@@ -1,34 +1,40 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Para el selector
 import { FontAwesome } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 
 const NutritionInfoScreen = ({ navigation }) => {
   const [selectedDisease, setSelectedDisease] = useState('diabetesTipo1'); // Estado para la enfermedad seleccionada
 
   // Consejos de nutrición por enfermedad
   const nutritionTips = {
-    diabetesTipo1: [
-      '1. Controla tu ingesta de carbohidratos y ajusta la dosis de insulina según sea necesario.',
-      '2. Consume alimentos ricos en fibra, como verduras, frutas y granos enteros.',
-      '3. Evita los alimentos procesados y altos en azúcares refinados.',
-      '4. Realiza comidas pequeñas y frecuentes para mantener estables los niveles de glucosa.',
-      '5. Consulta a un nutricionista para un plan personalizado.',
-    ],
-    diabetesTipo2: [
-      '1. Limita el consumo de carbohidratos simples y opta por carbohidratos complejos.',
-      '2. Incorpora proteínas magras en cada comida, como pollo, pescado o legumbres.',
-      '3. Reduce el consumo de grasas saturadas y evita las grasas trans.',
-      '4. Realiza actividad física regularmente para mejorar la sensibilidad a la insulina.',
-      '5. Mantén un peso saludable para controlar mejor la diabetes.',
-    ],
-    prediabetes: [
-      '1. Reduce el consumo de azúcares y carbohidratos refinados.',
-      '2. Aumenta la ingesta de fibra con verduras, frutas y granos enteros.',
-      '3. Realiza ejercicio físico al menos 30 minutos al día, 5 veces por semana.',
-      '4. Controla tu peso y evita el sobrepeso.',
-      '5. Consulta a un médico para un seguimiento regular.',
-    ],
+    diabetesTipo1: (
+      <>
+        <Text style={styles.tipText}>1. Controla tu ingesta de carbohidratos y ajusta la dosis de insulina según sea necesario.</Text>
+        <Text style={styles.tipText}>2. Consume alimentos ricos en fibra, como verduras, frutas y granos enteros.</Text>
+        <Text style={styles.tipText}>3. Evita los alimentos procesados y altos en azúcares refinados.</Text>
+        <Text style={styles.tipText}>4. Realiza comidas pequeñas y frecuentes para mantener estables los niveles de glucosa.</Text>
+        <Text style={styles.tipText}>5. Consulta a un nutricionista para un plan personalizado.</Text>
+      </>
+    ),
+    diabetesTipo2: (
+      <>
+        <Text style={styles.tipText}>1. Limita el consumo de carbohidratos simples y opta por carbohidratos complejos.</Text>
+        <Text style={styles.tipText}>2. Incorpora proteínas magras en cada comida, como pollo, pescado o legumbres.</Text>
+        <Text style={styles.tipText}>3. Reduce el consumo de grasas saturadas y evita las grasas trans.</Text>
+        <Text style={styles.tipText}>4. Realiza actividad física regularmente para mejorar la sensibilidad a la insulina.</Text>
+        <Text style={styles.tipText}>5. Mantén un peso saludable para controlar mejor la diabetes.</Text>
+      </>
+    ),
+    prediabetes: (
+      <>
+        <Text style={styles.tipText}>1. Reduce el consumo de azúcares y carbohidratos refinados.</Text>
+        <Text style={styles.tipText}>2. Aumenta la ingesta de fibra con verduras, frutas y granos enteros.</Text>
+        <Text style={styles.tipText}>3. Realiza ejercicio físico al menos 30 minutos al día, 5 veces por semana.</Text>
+        <Text style={styles.tipText}>4. Controla tu peso y evita el sobrepeso.</Text>
+        <Text style={styles.tipText}>5. Consulta a un médico para un seguimiento regular.</Text>
+      </>
+    ),
   };
 
   return (
@@ -56,11 +62,7 @@ const NutritionInfoScreen = ({ navigation }) => {
 
       {/* Consejos de nutrición */}
       <ScrollView style={styles.tipsContainer}>
-        {nutritionTips[selectedDisease].map((tip, index) => (
-          <View key={index} style={styles.tipItem}>
-            <Text style={styles.tipText}>{tip}</Text>
-          </View>
-        ))}
+        {nutritionTips[selectedDisease]}
       </ScrollView>
     </View>
   );
