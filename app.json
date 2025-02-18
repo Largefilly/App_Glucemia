@@ -39,7 +39,11 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-asset"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
     ],
     "extra": {
       "eas": {
