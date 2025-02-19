@@ -5,60 +5,69 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
   PermissionsAndroid,
   Platform,
   Linking,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import { Asset } from 'expo-asset';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-
-const DefaultProfileImage = require('../assets/FotoPerfil.png');
-
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import io from 'socket.io-client';
+
 const socket = io(
   'https://glucollerbackv2-aagbhme4fee4cmed.brazilsouth-01.azurewebsites.net'
 );
 
+interface Medicion {
+  hora: string;
+  valor: number;
+  tipo: string;
+}
+
 /**
- * Función auxiliar para obtener la imagen en base64 desde una URI.
- * Se utiliza fetch y FileReader para obtener un string en formato Data URL.
+ * Solicita permisos de almacenamiento en Android, con un timeout de 5 segundos
+ * en caso de que la solicitud no responda.
  */
-const getBase64FromUri = async (uri: string): Promise<string> => {
-  try {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Error al convertir blob a base64'));
-      reader.onloadend = () => {
-        const result = reader.result;
-        if (typeof result === 'string') {
-          resolve(result);
-        } else {
-          reject(new Error('El resultado no es una cadena'));
-        }
-      };
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error('Error en getBase64FromUri:', error);
-    throw error;
-  }
+const requestStoragePermission = async (): Promise<boolean> => {
+  if (Platform.OS !== 'android') return true;
+  return new Promise<boolean>((resolve) => {
+    const timer = setTimeout(() => {
+      console.log('requestStoragePermission: Timeout, asumiendo permiso.');
+      resolve(true);
+    }, 5000);
+
+    PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: 'Permiso de almacenamiento',
+        message:
+          'La aplicación necesita acceso al almacenamiento para guardar el PDF.',
+        buttonNeutral: 'Preguntar después',
+        buttonNegative: 'Cancelar',
+        buttonPositive: 'Aceptar',
+      }
+    )
+      .then((result) => {
+        clearTimeout(timer);
+        console.log('requestStoragePermission: Resultado:', result);
+        resolve(result === PermissionsAndroid.RESULTS.GRANTED);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        console.warn('requestStoragePermission: Error:', err);
+        resolve(false);
+      });
+  });
 };
 
-const ReporteScreen = ({ navigation }: { navigation: any }) => {
+const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('MedicionGlucosa');
-  const [mediciones, setMediciones] = useState<any[]>([]); // Estado para almacenar las mediciones
+  const [mediciones, setMediciones] = useState<Medicion[]>([]);
 
-  // Datos de ejemplo para las mediciones (con temporalidad en "tipo")
-  const datosMediciones = [
+  const datosMediciones: Medicion[] = [
     { hora: '08:00', valor: 120, tipo: 'Diaria' },
     { hora: '12:00', valor: 110, tipo: 'Diaria' },
     { hora: '18:00', valor: 130, tipo: 'Diaria' },
@@ -66,39 +75,26 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
   ];
 
   useEffect(() => {
-    // Simular la carga de mediciones
     setMediciones(datosMediciones);
   }, []);
 
-  // Función para generar el PDF usando expo-print y expo-sharing
   const generatePDF = async () => {
+    console.log('generatePDF: Inicio');
     try {
-      // 1. Cargar el asset del logo
-      const logoModule = require('../assets/onlylogo.png');
-      const logoAsset = Asset.fromModule(logoModule);
+      const hasPermission = await requestStoragePermission();
+      console.log('generatePDF: Permiso:', hasPermission);
+      // Se continúa incluso si no se obtuvo permiso, ya que en algunos dispositivos
+      // puede estar concedido de forma predeterminada.
 
-      // 2. Obtener la imagen en base64
-      let logoDataUrl = "";
-      if (logoAsset.localUri && logoAsset.localUri.startsWith("file://")) {
-        const logoBase64 = await FileSystem.readAsStringAsync(logoAsset.localUri, { encoding: FileSystem.EncodingType.Base64 });
-        logoDataUrl = `data:image/png;base64,${logoBase64}`;
-      } else {
-        // Convertir la URI remota a base64 usando fetch
-        logoDataUrl = await getBase64FromUri(logoAsset.uri);
-      }
-
-      // 3. Crear el contenido HTML del PDF
+      // Creamos el contenido HTML del PDF (sin imagen)
       const htmlContent = `
         <html>
           <head>
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { border-bottom: 2px solid #1D3557; padding-bottom: 20px; margin-bottom: 20px; }
-              .patient-info { display: flex; align-items: center; justify-content: space-between; }
-              .patient-info img { width: 100px; }
-              .patient-details { text-align: right; }
+              .header { border-bottom: 2px solid #1D3557; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }
               .patient-details p { margin: 2px 0; font-size: 14px; }
-              h1 { color: #1D3557; text-align: center; margin: 10px 0; }
+              h1 { color: #1D3557; margin: 10px 0; }
               .table-container { margin-bottom: 30px; }
               table { width: 100%; border-collapse: collapse; }
               th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
@@ -107,21 +103,15 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
             </style>
           </head>
           <body>
-            <div class="header">
-              <div class="patient-info">
-                <div class="logo">
-                  <img src="${logoDataUrl}" alt="Logo" />
-                </div>
-                <div class="patient-details">
-                  <p><strong>Nombre:</strong> Juan Pérez</p>
-                  <p><strong>Edad:</strong> 35</p>
-                  <p><strong>Sexo:</strong> Masculino</p>
-                </div>
+            <div class=\"header\">
+              <div class=\"patient-details\">
+                <p><strong>Nombre:</strong> Juan Pérez</p>
+                <p><strong>Edad:</strong> 35</p>
+                <p><strong>Sexo:</strong> Masculino</p>
               </div>
               <h1>Reporte de Medición de Glucosa</h1>
             </div>
-
-            <div class="table-container">
+            <div class=\"table-container\">
               <h2>Datos de Mediciones</h2>
               <table>
                 <tr>
@@ -142,32 +132,31 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
                   .join('')}
               </table>
             </div>
-
-            <div class="footer">
+            <div class=\"footer\">
               Reporte generado el ${new Date().toLocaleDateString()}
             </div>
           </body>
         </html>
       `;
+      console.log('generatePDF: HTML generado');
 
-      // 4. Generar el PDF
-      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      // Generar el PDF con react-native-html-to-pdf
+      const options = {
+        html: htmlContent,
+        fileName: 'Reporte',
+        directory: 'Documents', // Puedes cambiarlo o eliminarlo si causa problemas
+      };
+      const file = await RNHTMLtoPDF.convert(options);
+      console.log('generatePDF: PDF generado, filePath:', file.filePath);
 
-      // 5. En Android, copiamos el PDF a FileSystem.documentDirectory y lo compartimos
-      if (Platform.OS === 'android') {
-        const newUri = FileSystem.documentDirectory + 'Reporte.pdf';
-        await FileSystem.copyAsync({ from: uri, to: newUri });
-        Alert.alert('Éxito', 'El PDF se ha guardado correctamente.');
-        await Sharing.shareAsync(newUri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Compartir PDF',
-        });
-      } else {
-        await Sharing.shareAsync(uri);
-        Alert.alert('Éxito', 'El PDF se ha generado correctamente.');
-      }
+      // Compartir el PDF usando expo-sharing
+      await Sharing.shareAsync(file.filePath, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'Compartir PDF',
+      });
+      Alert.alert('Éxito', 'El PDF se ha generado y compartido correctamente.');
     } catch (error) {
-      console.error(error);
+      console.error('generatePDF: Error', error);
       Alert.alert('Error', 'No se pudo generar el PDF');
     }
   };
@@ -180,13 +169,10 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
       >
         <FontAwesome name="arrow-left" size={24} color="#e53945" />
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.downloadButton} onPress={generatePDF}>
         <FontAwesome name="download" size={30} color="#e53945" />
       </TouchableOpacity>
-
       <Text style={styles.title}>Reportes</Text>
-
       <View style={styles.tabNavigation}>
         <TouchableOpacity
           style={[
@@ -207,7 +193,6 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.tabButtonText}>Registro del reporte</Text>
         </TouchableOpacity>
       </View>
-
       {selectedTab === 'MedicionGlucosa' ? (
         <MedicionGlucosa />
       ) : (
@@ -217,21 +202,17 @@ const ReporteScreen = ({ navigation }: { navigation: any }) => {
   );
 };
 
-const MedicionGlucosa = () => {
+const MedicionGlucosa: React.FC = () => {
   const [glucoseLevel, setGlucoseLevel] = useState<string | null>('-');
-  const [lastMeasurementTime, setLastMeasurementTime] = useState<string | null>(
-    null
-  );
+  const [lastMeasurementTime, setLastMeasurementTime] = useState<string | null>(null);
   const [lastGlucoseLevel, setLastGlucoseLevel] = useState<number | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const storedGlucoseLevel = await AsyncStorage.getItem('lastGlucoseLevel');
-        const storedMeasurementTime = await AsyncStorage.getItem(
-          'lastMeasurementTime'
-        );
-        if (storedGlucoseLevel !== null && storedMeasurementTime !== null) {
+        const storedMeasurementTime = await AsyncStorage.getItem('lastMeasurementTime');
+        if (storedGlucoseLevel && storedMeasurementTime) {
           setGlucoseLevel(storedGlucoseLevel);
           setLastMeasurementTime(storedMeasurementTime);
         }
@@ -239,16 +220,10 @@ const MedicionGlucosa = () => {
         console.error('Error al cargar los datos persistentes:', error);
       }
     };
-
     loadData();
-
     socket.on('glucoseUpdate', (data) => {
-      console.log(
-        'Datos recibidos del socket:',
-        JSON.stringify(data, null, 2)
-      );
-      const newGlucoseValue =
-        data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
+      console.log('Datos recibidos del socket:', JSON.stringify(data, null, 2));
+      const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
       if (typeof newGlucoseValue === 'number') {
         const newGlucoseLevel = newGlucoseValue.toString();
         setGlucoseLevel(newGlucoseLevel);
@@ -263,7 +238,6 @@ const MedicionGlucosa = () => {
         console.error('El valor de glucosa recibido no es válido:', data);
       }
     });
-
     return () => {
       socket.off('glucoseUpdate');
     };
@@ -279,12 +253,7 @@ const MedicionGlucosa = () => {
 
   return (
     <View style={styles.glucoseContainer}>
-      <View
-        style={[
-          styles.circleContainer,
-          { borderColor: getGlucoseColor(glucoseLevel || '0') },
-        ]}
-      >
+      <View style={[styles.circleContainer, { borderColor: getGlucoseColor(glucoseLevel || '0') }]}>
         <Text style={styles.circleText}>{glucoseLevel}</Text>
         <Text style={styles.unitText}>mg/dl</Text>
       </View>
@@ -309,24 +278,19 @@ const MedicionGlucosa = () => {
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#6FB5E1' }]} />
-          <Text style={styles.legendText}>
-            Hipoglucemia (&lt; 70 mg/dl)
-          </Text>
+          <Text style={styles.legendText}>Hipoglucemia (&lt; 70 mg/dl)</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#E53945' }]} />
-          <Text style={styles.legendText}>
-            Hiperglucemia (&gt; 140 mg/dl)
-          </Text>
+          <Text style={styles.legendText}>Hiperglucemia (&gt; 140 mg/dl)</Text>
         </View>
       </View>
     </View>
   );
 };
 
-const RegistroReporte = () => {
-  const [normalPrecautionPercentage, setNormalPrecautionPercentage] =
-    useState(0);
+const RegistroReporte: React.FC = () => {
+  const [normalPrecautionPercentage, setNormalPrecautionPercentage] = useState(0);
   const [hyperglycemiaPercentage, setHyperglycemiaPercentage] = useState(0);
   const [hypoglycemiaPercentage, setHypoglycemiaPercentage] = useState(0);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -345,7 +309,7 @@ const RegistroReporte = () => {
       const loadContacts = async () => {
         try {
           const storedContacts = await AsyncStorage.getItem('contacts');
-          if (storedContacts !== null) {
+          if (storedContacts) {
             setContacts(JSON.parse(storedContacts));
           }
         } catch (error) {
@@ -411,7 +375,6 @@ const RegistroReporte = () => {
         {contacts && contacts.length > 0 ? (
           contacts.map((contact, index) => (
             <View style={styles.contactsContainer} key={index}>
-              <Image source={DefaultProfileImage} style={styles.contactImage} />
               <Text style={styles.contactName}>{contact.name}</Text>
               <Text style={styles.contactDate}>{contact.date}</Text>
             </View>
@@ -424,7 +387,7 @@ const RegistroReporte = () => {
   );
 };
 
-const CustomCircle = ({ title, percentage, color }: { title: string; percentage: number; color: string; }) => (
+const CustomCircle: React.FC<{ title: string; percentage: number; color: string }> = ({ title, percentage, color }) => (
   <View style={styles.chartItem}>
     <Text style={styles.chartTitle}>{title}</Text>
     <View style={[styles.circleContainer, { borderColor: color }]}>
@@ -433,7 +396,7 @@ const CustomCircle = ({ title, percentage, color }: { title: string; percentage:
   </View>
 );
 
-const MeasurementCard = ({ title }: { title: string; }) => {
+const MeasurementCard: React.FC<{ title: string }> = ({ title }) => {
   const [normal, precaucion, hipo, hiper] = generateRandomPercentages();
   return (
     <View style={styles.card}>
@@ -620,13 +583,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 5,
-  },
-  contactImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#E53945',
-    marginRight: 10,
   },
   contactName: {
     fontSize: 16,
