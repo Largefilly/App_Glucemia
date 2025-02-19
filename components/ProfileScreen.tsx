@@ -37,7 +37,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     try {
       
       const name = await AsyncStorage.getItem('userName');
-      const lastName = await AsyncStorage.getItem('userLastName');
+      const lastName = await AsyncStorage.getItem('userLastname');
       const email = await AsyncStorage.getItem('userEmail');
 
       if (name) {
