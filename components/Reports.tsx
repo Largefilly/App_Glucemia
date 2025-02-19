@@ -8,13 +8,12 @@ import {
   Alert,
   PermissionsAndroid,
   Platform,
-  Linking,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Sharing from 'expo-sharing';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import * as Print from 'expo-print'; // Se utiliza expo-print en lugar de react-native-html-to-pdf
 import io from 'socket.io-client';
 
 const socket = io(
@@ -103,15 +102,15 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </style>
           </head>
           <body>
-            <div class=\"header\">
-              <div class=\"patient-details\">
+            <div class="header">
+              <div class="patient-details">
                 <p><strong>Nombre:</strong> Juan Pérez</p>
                 <p><strong>Edad:</strong> 35</p>
                 <p><strong>Sexo:</strong> Masculino</p>
               </div>
               <h1>Reporte de Medición de Glucosa</h1>
             </div>
-            <div class=\"table-container\">
+            <div class="table-container">
               <h2>Datos de Mediciones</h2>
               <table>
                 <tr>
@@ -132,7 +131,7 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   .join('')}
               </table>
             </div>
-            <div class=\"footer\">
+            <div class="footer">
               Reporte generado el ${new Date().toLocaleDateString()}
             </div>
           </body>
@@ -140,17 +139,12 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       `;
       console.log('generatePDF: HTML generado');
 
-      // Generar el PDF con react-native-html-to-pdf
-      const options = {
-        html: htmlContent,
-        fileName: 'Reporte',
-        directory: 'Documents', // Puedes cambiarlo o eliminarlo si causa problemas
-      };
-      const file = await RNHTMLtoPDF.convert(options);
-      console.log('generatePDF: PDF generado, filePath:', file.filePath);
+      // Generar el PDF usando expo-print
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      console.log('generatePDF: PDF generado, filePath:', uri);
 
       // Compartir el PDF usando expo-sharing
-      await Sharing.shareAsync(file.filePath, {
+      await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
         dialogTitle: 'Compartir PDF',
       });
@@ -221,6 +215,8 @@ const MedicionGlucosa: React.FC = () => {
       }
     };
     loadData();
+
+    // Se utiliza un arreglo de dependencias vacío para evitar múltiples suscripciones
     socket.on('glucoseUpdate', (data) => {
       console.log('Datos recibidos del socket:', JSON.stringify(data, null, 2));
       const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
@@ -241,7 +237,7 @@ const MedicionGlucosa: React.FC = () => {
     return () => {
       socket.off('glucoseUpdate');
     };
-  }, [lastGlucoseLevel]);
+  }, []);
 
   const getGlucoseColor = (level: string) => {
     const numericLevel = Number(level);
