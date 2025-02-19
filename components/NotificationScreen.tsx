@@ -3,37 +3,40 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import api from '../server/api'; // Importar la instancia de API
 
 const NotificationScreen = ({ route }) => {
     const navigation = useNavigation();
-    const [notifications, setNotifications] = useState([]);
+    const [historial, setHistorial] = useState([]);
 
-    // Cargar notificaciones guardadas
+    // Obtener el historial de mediciones del paciente
     useEffect(() => {
-        const loadNotifications = async () => {
+        const fetchHistorial = async () => {
             try {
-                const storedNotifications = await AsyncStorage.getItem('notifications');
-                if (storedNotifications) {
-                    setNotifications(JSON.parse(storedNotifications));
+                const token = await AsyncStorage.getItem('token');
+                const pacienteId = await AsyncStorage.getItem('userID'); // Obtener el ID del paciente
+
+                console.log("Token:", token); // Depuración
+                console.log("Paciente ID:", pacienteId); // Depuración
+
+                if (token && pacienteId) {
+                    const response = await api.get(`/glucose/historial/${pacienteId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    if (response.data && response.data.historial) {
+                        setHistorial(response.data.historial);
+                    }
                 }
             } catch (error) {
-                console.error("Error al cargar notificaciones:", error);
+                console.error("Error al obtener el historial de mediciones:", error);
             }
         };
-        loadNotifications();
+
+        fetchHistorial();
     }, []);
-
-    // Si se pasa una nueva notificación desde otra pantalla, se agrega
-    useEffect(() => {
-        if (route.params?.newNotification) {
-            const newNotification = route.params.newNotification;
-            const updatedNotifications = [newNotification, ...notifications];
-            setNotifications(updatedNotifications);
-
-            // Guardar en AsyncStorage
-            AsyncStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-        }
-    }, [route.params?.newNotification]);
 
     return (
         <View style={styles.container}>
@@ -42,19 +45,27 @@ const NotificationScreen = ({ route }) => {
             </TouchableOpacity>
 
             <View style={styles.titleContainer}>
-                <Text style={styles.title}>Historial Completo{'\n'}de Notificaciones</Text>
+                <Text style={styles.title}>Historial Completo{'\n'}de Mediciones</Text>
             </View>
-            
-            <FlatList
-                data={notifications}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={[styles.notificationItem, item.read ? styles.notificationRead : null]}>
-                        <Text style={styles.notificationTitle}>{item.title}</Text>
-                        <Text style={styles.notificationDescription}>{item.description}</Text>
-                    </View>
-                )}
-            />
+
+            {historial.length > 0 ? (
+                <FlatList
+                    data={historial}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <View style={styles.notificationItem}>
+                            <Text style={styles.notificationTitle}>
+                                Fecha: {new Date(item.fecha_hora).toLocaleString()}
+                            </Text>
+                            <Text style={styles.notificationDescription}>
+                                Nivel de Glucosa: {item.nivel_glucosa}
+                            </Text>
+                        </View>
+                    )}
+                />
+            ) : (
+                <Text style={styles.noDataText}>No hay mediciones registradas.</Text>
+            )}
         </View>
     );
 };
@@ -100,9 +111,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-    notificationRead: {
-        opacity: 0.6,
-    },
     notificationTitle: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -112,6 +120,12 @@ const styles = StyleSheet.create({
     notificationDescription: {
         fontSize: 14,
         color: '#666',
+    },
+    noDataText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#666',
+        marginTop: 20,
     },
 });
 

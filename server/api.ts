@@ -127,6 +127,5 @@ export const sendGlucoseLevel = async (
   }
 };
 
-
 // Exportar la instancia de Axios por si se necesita usarla directamente
 export default api;

@@ -16,11 +16,20 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('userEmail', correo);
         await AsyncStorage.setItem('userType', data.tipo_usuario);
-  
         if (data.nombre) {
           await AsyncStorage.setItem('userName', data.nombre); 
           console.log("Nombre guardado en AsyncStorage:", data.nombre);  // 🔍 Agregamos un log para verificar
         }
+        if (data.apellido) {
+          await AsyncStorage.setItem('userLastname', data.apellido); 
+          console.log("apellido guardado en AsyncStorage:", data.apellido);  // 🔍 Agregamos un log para verificar
+        }
+        if (data.id) {
+          await AsyncStorage.setItem('userID', data.id);
+          console.log("id guardado en AsyncStorage:", data.id);  // 🔍 Agregamos un log para verificar
+        }
+        
+        
   
         if (data.tipo_usuario === 'medico') {
           navigation.navigate('DoctorMain');
