@@ -22,16 +22,16 @@ const pacientes = [
   },
 ];
 
-// Actualiza el tipo de parámetros para que coincida con tu configuración en App.js
+// Actualiza el tipado para que coincida con la configuración en App.js:
 type RootStackParamList = {
-  DoctorMain: undefined;       // Debe ser "DoctorMain" si en App.js registras la pantalla con ese nombre
+  DoctorMain: undefined;           // Nombre usado en App.js para la pantalla principal del doctor
   DetallePaciente: { paciente: any };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const DoctorHomeScreen = () => {
-  // Usamos "DoctorMain" en la tipificación, que es el nombre real de la pantalla en App.js
+  // Usamos "DoctorMain" en la tipificación
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'DoctorMain'>>();
 
   const renderPaciente = ({ item }: { item: any }) => (
