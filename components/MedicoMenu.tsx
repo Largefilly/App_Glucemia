@@ -2,6 +2,7 @@ import React from 'react';
 import { SafeAreaView, FlatList, Text, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+
 const pacientes = [
   { 
     id: '1', 
@@ -20,18 +21,18 @@ const pacientes = [
     estado: 'alerta'
   },
 ];
-// Define los tipos de parámetros para cada pantalla
+
+// Actualiza el tipo de parámetros para que coincida con tu configuración en App.js
 type RootStackParamList = {
-  DoctorHome: undefined;
+  DoctorMain: undefined;       // Debe ser "DoctorMain" si en App.js registras la pantalla con ese nombre
   DetallePaciente: { paciente: any };
 };
 
-// Crea el Stack Navigator
 const Stack = createStackNavigator<RootStackParamList>();
 
 const DoctorHomeScreen = () => {
-  // Tipamos el hook de navegación usando StackNavigationProp
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'DoctorHome'>>();
+  // Usamos "DoctorMain" en la tipificación, que es el nombre real de la pantalla en App.js
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'DoctorMain'>>();
 
   const renderPaciente = ({ item }: { item: any }) => (
     <TouchableOpacity 
