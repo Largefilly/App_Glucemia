@@ -35,7 +35,7 @@ const requestStoragePermission = async (): Promise<boolean> => {
     const timer = setTimeout(() => {
       console.log('requestStoragePermission: Timeout, asumiendo permiso.');
       resolve(true);
-    }, 5000);
+    }, 1000);
 
     PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -81,33 +81,125 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const hasPermission = await requestStoragePermission();
       console.log('generatePDF: Permiso:', hasPermission);
-      // Se continúa incluso si no se obtuvo permiso
-
-      // Definimos el contenido HTML del PDF
+  
+      // Generamos la fecha/hora de forma dinámica
+      const now = new Date();
+      const dateString = now.toLocaleDateString();   // p.ej. 16/02/2025
+      const timeString = now.toLocaleTimeString();   // p.ej. 1:02:13 p. m.
+      const fullDateTime = `${dateString}, ${timeString}`;
+  
+      // Construimos las filas de la tabla a partir de mediciones
+      const rowsHtml = mediciones.map((med) => `
+        <tr>
+          <td>${med.hora}</td>
+          <td>${med.valor}</td>
+          <td>${med.tipo}</td>
+        </tr>
+      `).join('');
+  
+      // Adaptamos tu HTML con estilos, cabecera, tabla y gráfico
       const htmlContent = `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { border-bottom: 2px solid #1D3557; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }
-              .patient-details p { margin: 2px 0; font-size: 14px; }
-              h1 { color: #1D3557; margin: 10px 0; }
-              .table-container { margin-bottom: 30px; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-              th { background-color: #f0faf8; }
-              .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #666; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="patient-details">
-                <p><strong>Nombre:</strong> Juan Pérez</p>
-                <p><strong>Edad:</strong> 35</p>
-                <p><strong>Sexo:</strong> Masculino</p>
-              </div>
-              <h1>Reporte de Medición de Glucosa</h1>
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Reporte de Medición de Glucosa</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+            }
+            /* 1. Header: Logo a la izquierda y datos del paciente a la derecha */
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 2px solid #1D3557;
+              padding-bottom: 20px;
+              margin-bottom: 20px;
+            }
+            .logo {
+              width: 100px;
+            }
+            .patient-details {
+              text-align: right;
+            }
+            .patient-details p {
+              margin: 2px 0;
+              font-size: 14px;
+            }
+            /* 2. Título: Título principal y fecha/hora */
+            .title-section {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .title-section h1 {
+              color: #1D3557;
+              margin: 0;
+            }
+            .title-section p {
+              margin: 5px 0 0;
+              font-size: 14px;
+              color: #666;
+            }
+            /* 3. Contenido: Tabla y gráfico */
+            .content {
+              margin-bottom: 20px;
+            }
+            .table-container {
+              margin-bottom: 30px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #ccc;
+              padding: 10px;
+              text-align: center;
+            }
+            th {
+              background-color: #f0faf8;
+            }
+            .chart-container {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .footer {
+              margin-top: 20px;
+              font-size: 12px;
+              text-align: center;
+              color: #666;
+            }
+          </style>
+        </head>
+        <body>
+          <!-- 1. Header -->
+          <div class="header">
+            <!-- Logo a la izquierda -->
+            <img 
+              src="https://github.com/Largefilly/App_Glucemia/blob/master/assets/logoGlucoller.png?raw=true" 
+              alt="Logo" 
+              class="logo"
+            />
+            <!-- Datos del paciente a la derecha -->
+            <div class="patient-details">
+              <p><strong>Nombre:</strong> Juan Pérez</p>
+              <p><strong>Edad:</strong> 35</p>
+              <p><strong>Sexo:</strong> Masculino</p>
             </div>
+          </div>
+  
+          <!-- 2. Título -->
+          <div class="title-section">
+            <h1>Reporte de Medición de Glucosa</h1>
+            <!-- Aquí usamos la fecha/hora dinámica -->
+            <p>Generado el ${fullDateTime}</p>
+          </div>
+  
+          <!-- 3. Contenido -->
+          <div class="content">
+            <!-- Tabla con los datos de las mediciones -->
             <div class="table-container">
               <h2>Datos de Mediciones</h2>
               <table>
@@ -116,31 +208,71 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   <th>Valor (mg/dl)</th>
                   <th>Temporalidad</th>
                 </tr>
-                ${mediciones
-                  .map(
-                    (medicion) => `
-                  <tr>
-                    <td>${medicion.hora}</td>
-                    <td>${medicion.valor}</td>
-                    <td>${medicion.tipo}</td>
-                  </tr>
-                `
-                  )
-                  .join('')}
+                ${rowsHtml}
               </table>
             </div>
-            <div class="footer">
-              Reporte generado el ${new Date().toLocaleDateString()}
+  
+            <!-- Gráfico estadístico con cuadrícula y ejes (estático) -->
+            <div class="chart-container">
+              <h2>Gráfico de Mediciones</h2>
+              <svg width="400" height="300" style="margin: 0 auto; display: block;">
+                <!-- Ejes -->
+                <line x1="50" y1="250" x2="380" y2="250" stroke="black" stroke-width="2"/>  <!-- Eje X -->
+                <line x1="50" y1="250" x2="50" y2="50" stroke="black" stroke-width="2"/>     <!-- Eje Y -->
+  
+                <!-- Cuadrícula y etiquetas del eje Y (0 a 200 en intervalos de 50) -->
+                <g font-size="10" fill="black">
+                  <line x1="50" y1="250" x2="380" y2="250" stroke="#ddd" stroke-dasharray="2,2"/>
+                  <text x="40" y="254" text-anchor="end">0</text>
+  
+                  <line x1="50" y1="200" x2="380" y2="200" stroke="#ddd" stroke-dasharray="2,2"/>
+                  <text x="40" y="204" text-anchor="end">50</text>
+  
+                  <line x1="50" y1="150" x2="380" y2="150" stroke="#ddd" stroke-dasharray="2,2"/>
+                  <text x="40" y="154" text-anchor="end">100</text>
+  
+                  <line x1="50" y1="100" x2="380" y2="100" stroke="#ddd" stroke-dasharray="2,2"/>
+                  <text x="40" y="104" text-anchor="end">150</text>
+  
+                  <line x1="50" y1="50" x2="380" y2="50" stroke="#ddd" stroke-dasharray="2,2"/>
+                  <text x="40" y="54" text-anchor="end">200</text>
+                </g>
+  
+                <!-- Etiquetas del eje X -->
+                <g font-size="10" fill="black">
+                  <text x="50" y="265" text-anchor="middle">08:00</text>
+                  <text x="160" y="265" text-anchor="middle">12:00</text>
+                  <text x="270" y="265" text-anchor="middle">18:00</text>
+                  <text x="380" y="265" text-anchor="middle">22:00</text>
+                </g>
+  
+                <!-- Línea de datos (polyline) -->
+                <!-- Usamos la fórmula: y = 250 - valor -->
+                <polyline fill="none" stroke="#E53945" stroke-width="2"
+                  points="50,130 160,140 270,120 380,150" 
+                />
+  
+                <!-- Puntos de datos -->
+                <circle cx="50" cy="130" r="4" fill="#E53945" />
+                <circle cx="160" cy="140" r="4" fill="#E53945" />
+                <circle cx="270" cy="120" r="4" fill="#E53945" />
+                <circle cx="380" cy="150" r="4" fill="#E53945" />
+              </svg>
             </div>
-          </body>
+          </div>
+  
+          <!-- Footer -->
+          <div class="footer">
+            Reporte generado el ${dateString} a las ${timeString}.
+          </div>
+        </body>
         </html>
       `;
-      console.log('generatePDF: HTML generado');
-
+  
       // Generamos el PDF usando expo-print
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       console.log('generatePDF: PDF generado, filePath:', uri);
-
+  
       // Compartimos el PDF usando expo-sharing
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
@@ -151,7 +283,7 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       console.error('generatePDF: Error', error);
       Alert.alert('Error', 'No se pudo generar el PDF');
     }
-  };
+  };  
 
   return (
     <View style={styles.container}>
