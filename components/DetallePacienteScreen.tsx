@@ -3,8 +3,15 @@ import { SafeAreaView, ScrollView, Text, StyleSheet, View, TouchableOpacity, Ima
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import { RouteProp } from '@react-navigation/native';
+type DetallePacienteRouteProp = RouteProp<RootStackParamList, 'DetallePaciente'>;
+type RootStackParamList = {
+  DoctorHome: undefined;
+  DetallePaciente: { paciente: any };
+};
 
-const DetallePacienteScreen = ({ route }) => {
+
+const DetallePacienteScreen = ({ route }: { route: DetallePacienteRouteProp }) => {
   const { paciente } = route.params;
   const navigation = useNavigation();
 
