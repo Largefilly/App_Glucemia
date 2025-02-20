@@ -13,7 +13,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Sharing from 'expo-sharing';
-import * as Print from 'expo-print'; // Se utiliza expo-print en lugar de react-native-html-to-pdf
+import * as Print from 'expo-print';
 import io from 'socket.io-client';
 
 const socket = io(
@@ -27,8 +27,7 @@ interface Medicion {
 }
 
 /**
- * Solicita permisos de almacenamiento en Android, con un timeout de 5 segundos
- * en caso de que la solicitud no responda.
+ * Solicita permisos de almacenamiento en Android, con un timeout de 5 segundos.
  */
 const requestStoragePermission = async (): Promise<boolean> => {
   if (Platform.OS !== 'android') return true;
@@ -82,10 +81,9 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const hasPermission = await requestStoragePermission();
       console.log('generatePDF: Permiso:', hasPermission);
-      // Se continúa incluso si no se obtuvo permiso, ya que en algunos dispositivos
-      // puede estar concedido de forma predeterminada.
+      // Se continúa incluso si no se obtuvo permiso
 
-      // Creamos el contenido HTML del PDF (sin imagen)
+      // Definimos el contenido HTML del PDF
       const htmlContent = `
         <html>
           <head>
@@ -139,11 +137,11 @@ const ReporteScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       `;
       console.log('generatePDF: HTML generado');
 
-      // Generar el PDF usando expo-print
+      // Generamos el PDF usando expo-print
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       console.log('generatePDF: PDF generado, filePath:', uri);
 
-      // Compartir el PDF usando expo-sharing
+      // Compartimos el PDF usando expo-sharing
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
         dialogTitle: 'Compartir PDF',
@@ -216,7 +214,6 @@ const MedicionGlucosa: React.FC = () => {
     };
     loadData();
 
-    // Se utiliza un arreglo de dependencias vacío para evitar múltiples suscripciones
     socket.on('glucoseUpdate', (data) => {
       console.log('Datos recibidos del socket:', JSON.stringify(data, null, 2));
       const newGlucoseValue = data?.nivel_glucosa ?? data?.measurement?.nivel_glucosa;
@@ -249,7 +246,12 @@ const MedicionGlucosa: React.FC = () => {
 
   return (
     <View style={styles.glucoseContainer}>
-      <View style={[styles.circleContainer, { borderColor: getGlucoseColor(glucoseLevel || '0') }]}>
+      <View
+        style={[
+          styles.circleContainer,
+          { borderColor: getGlucoseColor(glucoseLevel || '0') },
+        ]}
+      >
         <Text style={styles.circleText}>{glucoseLevel}</Text>
         <Text style={styles.unitText}>mg/dl</Text>
       </View>
