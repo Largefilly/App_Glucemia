@@ -24,7 +24,7 @@
         "foregroundImage": "./assets/onlylogo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anruzulo.App_Glucemia"
+      "package": "com.largefilly.App_Glucemia"
     },
     "web": {
       "favicon": "./assets/onlylogo.png"
