@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, Image, Alert, FlatList, Modal } from 'react-native';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -34,6 +35,7 @@ const HomeScreen = () => {
     const [notifications, setNotifications] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [lastGlucoseLevel, setLastGlucoseLevel] = useState(null); 
+    
 
 
     // Solicitar permisos de notificación
@@ -114,6 +116,28 @@ const HomeScreen = () => {
         };
       
         loadProfileDataAndSubscribeToGlucose();
+
+             // Escuchar alertas de peligro
+             socket.on('new-alert', (data) => {
+                // Mostrar notificación con el mensaje
+                Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "¡Alerta de Peligro!",
+                        body: data.message,
+                        sound: 'default', // Sonido por defecto de notificación
+                    },
+                    trigger: null,
+                });
+
+                // Reproducir sonido de alerta
+                const playPanicSound = async () => {
+                    const { sound } = await Audio.Sound.createAsync(
+                        require('../assets/sound/notif.mp3')
+                    );
+                    await sound.playAsync();
+                };
+                playPanicSound();
+            });
       
         // Limpiar la suscripción del socket cuando el componente se desmonte
         return () => {
@@ -194,9 +218,34 @@ const HomeScreen = () => {
         }     
         
     };    
-   
 
     const handleWarningPress = async () => {
+        try {
+            // Obtener el token del AsyncStorage
+            const token = await AsyncStorage.getItem('token');
+            
+            // Enviar solicitud POST al backend para activar la alerta
+            const response = await axios.post(
+                'https://glucollerbackv2-aagbhme4fee4cmed.brazilsouth-01.azurewebsites.net/api/alert',
+                {}, // Body vacío
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+    
+            if (response.data.success) {
+                // Reproducir sonido de alerta
+                const { sound } = await Audio.Sound.createAsync(
+                    require('../assets/sound/notif.mp3') // Archivo de sonido personalizado
+                );
+                await sound.playAsync();
+            }
+        } catch (error) {
+            console.error('Error al enviar alerta:', error);
+            Alert.alert('Error', 'No se pudo enviar la alerta');
+        }
     };
     
     const getRandomGlucoseLevel = () => {
