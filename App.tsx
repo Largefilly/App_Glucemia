@@ -120,34 +120,10 @@ const App: React.FC = () => {
   );
 
   // Drawer para las funciones del médico
-  const DoctorDrawerNavigator = () => (
-    <Drawer.Navigator
-      initialRouteName="Inicio Médico"
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: { backgroundColor: '#fff', width: 250 },
-        drawerActiveTintColor: '#1D3557',
-        drawerInactiveTintColor: '#808080',
-        drawerLabelStyle: { fontFamily: 'Inder_400Regular', fontSize: 16 },
-        drawerItemStyle: { marginVertical: 5 },
-      }}
-    >
-      <Drawer.Screen
-        name="Inicio Médico"
-        component={DoctorHomeScreen}
-        options={{
-          drawerIcon: ({ color, size }) => <FontAwesome name="stethoscope" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="Reportes Médicos"
-        component={ReporteScreen}
-        options={{
-          drawerIcon: ({ color, size }) => <FontAwesome name="file-text-o" size={size} color={color} />,
-        }}
-      />
-    </Drawer.Navigator>
-  );
+  const DoctorNavigator = () => {
+    return <DoctorHomeScreen />;
+  };
+  
 
   return (
     <NavigationContainer>
@@ -169,12 +145,11 @@ const App: React.FC = () => {
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ headerShown: false }} />
           <Stack.Screen name="NotificationScreen" component={NotificationScreen} options={{ headerShown: false }} />
           {/* Rutas para el médico */}
-          <Stack.Screen name="DoctorMain" component={DoctorDrawerNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="DoctorMain" component={DoctorHomeScreen} options={{ headerShown: false }} />
           <Stack.Screen name="DetallePaciente" component={DetallePacienteScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
       </SafeAreaView>
     </NavigationContainer>
   );
 };
-
 export default App;
